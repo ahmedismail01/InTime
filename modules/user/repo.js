@@ -1,5 +1,6 @@
+const { query } = require("express");
 const User = require("./model");
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcrypt");
 
 const isExists = async (query) => {
   const object = await User.findOne(query);
@@ -37,11 +38,10 @@ const create = async (form) => {
   }
 };
 
-const update = async (id, form) => {
-  const isUserExists = await isExists({ _id: id });
+const update = async (query, form) => {
+  const isUserExists = await isExists(query);
   if (isUserExists.success) {
-    await User.updateOne({ _id: id }, form);
-    const user = await User.findById({_id: id})
+    const user = await User.updateOne(query, form);
     return {
       success: true,
       record: user,
@@ -83,6 +83,7 @@ const comparePassword = async (email, password) => {
 };
 
 module.exports = {
+  isExists,
   create,
   list,
   get,

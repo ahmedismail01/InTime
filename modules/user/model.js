@@ -32,9 +32,6 @@ var user = new Schema({
       type: Number,
     },
   },
-  token : {
-    type : String
-  },
   profilePhoto: {
     type: String,
   },
@@ -59,6 +56,9 @@ var user = new Schema({
       type: Number,
       default: 0,
     },
+  },
+  otp : {
+type : Number
   },
   createdAt: {
     type: Date,
