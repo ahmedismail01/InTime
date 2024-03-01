@@ -6,7 +6,7 @@ const routes = require("./router/index");
 const cors = require('cors')
 
 var corsOptions = {
-  origin:" http://localhost:3000/",
+  origin:"http://localhost:8080/",
   optionsSuccessStatus: 200 
 }
 app.use(cors(corsOptions))
