@@ -35,7 +35,6 @@ const logIn = async (req, res) => {
     form.email,
     form.password
   );
-  console.log(success);
   if (success) {
     const token = jwt.sign(
       {
