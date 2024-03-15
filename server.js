@@ -4,21 +4,11 @@ const app = express();
 const connection = require("./config/dbConnection");
 const routes = require("./router/index");
 const cors = require("cors");
-const session = require("express-session")
-const flash = require('connect-flash')
-const passport = require('passport')
+
+
 
 app.use(cors());
 app.use(express.json());
-app.use(session({
-  secret : process.env.SESSION_SECRET,
-  resave : false,
-  saveUninitialized : false,
-}))
-app.use(flash())
-app.use(passport.initialize())
-app.use(passport.session())
-
 app.use(routes);
 
 app.all("*", (req, res, next) => {
