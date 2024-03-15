@@ -1,6 +1,6 @@
 const app = require("express").Router()
-const userRoute = require('./user/index')
+const routes = require('./user/index')
 
-app.use("/api/v1",userRoute)
+app.use("/api/v1",routes)
 
 module.exports = app

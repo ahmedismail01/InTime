@@ -1,19 +1,20 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt");
+const { number } = require("joi");
 const saltrounds = 5;
 var user = new Schema({
   name: {
     type: String,
     required: true,
   },
-  username: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
+  },
+  phone : {
+    type : Number,
+    required : true
   },
   password: {
     type: String,
@@ -56,9 +57,6 @@ var user = new Schema({
       type: Number,
       default: 0,
     },
-  },
-  otp : {
-type : Number
   },
   createdAt: {
     type: Date,
