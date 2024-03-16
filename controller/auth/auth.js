@@ -56,6 +56,7 @@ const logIn = async (req, res) => {
     form.password
   );
   if (success) {
+    if(record.isActive){     
     const token = jwt.sign(
       {
         user: {
@@ -71,6 +72,9 @@ const logIn = async (req, res) => {
       name: record.name,
       token,
     });
+    }else{
+      res.json({success : false , message : "activate your account first"})
+    }
   } else {
     res.json({ success, message });
   }

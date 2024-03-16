@@ -12,6 +12,7 @@ const isExists = async (query) => {
     };
   return {
     success: false,
+    message: "user not found",
     status: 404,
   };
 };
@@ -21,7 +22,7 @@ const list = async (query) => {
   else return await User.find({});
 };
 const get = async (query) => {
-  if (query) return await User.findOne(query);
+  if (query) return await isExists(query);
   else return { message: "you have to send a query" };
 };
 const create = async (form) => {
@@ -62,6 +63,7 @@ const remove = async (id) => {
     };
   }
 };
+
 const comparePassword = async (email, password) => {
   const user = await isExists({ email: email });
   if (user.success) {

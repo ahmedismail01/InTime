@@ -1,10 +1,9 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-var task = new Schema({
- allTasks : {
+var taskSchema = new Schema({
   name: {
     type: String,
-    required : true,
+    required: true,
   },
   disc: {
     type: String,
@@ -12,22 +11,8 @@ var task = new Schema({
   createdAt: {
     type: Date,
   },
-  start: {
-    date: {
-      type: Date,
-    },
-    time: {
-      type: String,
-    },
-  },
-  end: {
-    time: {
-      type: String,
-    },
-    date: {
-      type: Date,
-    },
-  },
+  startAt: Date,
+  end: Date,
   priority: {
     type: Number,
   },
@@ -37,15 +22,14 @@ var task = new Schema({
   isFinished: {
     type: Boolean,
   },
-  steps: {
-    numOfSteps: {
-      type: Number,
+  steps: [
+    {
+      stepDisc: String,
+      completed: Boolean,
     },
-    completedSteps: {
-      type: Number,
-    },
-  },
- groupId : { type : mongoose.SchemaTypes.ObjectId}
- },
- userId : { type : mongoose.SchemaTypes.ObjectId}
+  ],
+  groupId: { type: mongoose.SchemaTypes.ObjectId },
+  userId: { type: mongoose.SchemaTypes.ObjectId },
 });
+
+module.exports = userModel = mongoose.model("task", taskSchema);
