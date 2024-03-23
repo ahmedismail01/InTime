@@ -56,24 +56,24 @@ const logIn = async (req, res) => {
     form.password
   );
   if (success) {
-    if(record.isActive){     
-    const token = jwt.sign(
-      {
-        user: {
-          id: record._id,
-          isActive: record.isActive,
+    if (record.isActive) {
+      const token = jwt.sign(
+        {
+          user: {
+            id: record._id,
+            isActive: record.isActive,
+          },
         },
-      },
-      process.env.JWT_PRIVATE_KEY
-    );
-    res.json({
-      success,
-      email: record.email,
-      name: record.name,
-      token,
-    });
-    }else{
-      res.json({success : false , message : "activate your account first"})
+        process.env.JWT_PRIVATE_KEY
+      );
+      res.json({
+        success,
+        email: record.email,
+        name: record.name,
+        token,
+      });
+    } else {
+      res.json({ success: false, message: "activate your account first" });
     }
   } else {
     res.json({ success, message });
@@ -182,7 +182,7 @@ const resendActivationCode = async (req, res) => {
     if (user.record.isActive) {
       res.json({ success: false, message: "user already activated" });
     } else {
-      const newOtp = generateOtp();
+      const newOtp = await generateOtp();
       await removeOtp({ email: email });
       const hashedOtp = await bcrypt.hash(`${newOtp}`, 5);
       const otpForm = {

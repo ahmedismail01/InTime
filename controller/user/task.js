@@ -11,8 +11,9 @@ const createTask = async (req, res) => {
 
 const getUserTasks = async (req, res) => {
   const tasks = await repo.list({ userId: req.user.id });
+  console.log(tasks)
   res.json(
-    tasks[0]
+    tasks
       ? { success: true, record: tasks }
       : { success: false, message: "you dont have any tasks" }
   );

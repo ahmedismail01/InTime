@@ -37,13 +37,13 @@ const update = async (query, form) => {
   const ifExists = await isExists(query);
   if (ifExists.success) {
     try {
-      if(ifExists.record.name == form?.name){
+      if (ifExists.record.name == form?.name) {
         return {
-          success : false ,
-          message : "you have task with the same name"
-        }
+          success: false,
+          message: "you have task with the same name",
+        };
       }
-      const updated = await Model.findByIdAndUpdate(query, form , {new : true});
+      const updated = await Model.findOneAndUpdate(query, form, { new: true });
       return {
         success: true,
         record: updated,
@@ -86,12 +86,12 @@ const remove = async (id) => {
 
 const create = async (form) => {
   try {
-    const exists = await isExists({ name : form.name , userId : form.userId})
-    if(exists.success){
-   return {
-    success: false,
-    message : "you have task with the same name",
-  }
+    const exists = await isExists({ name: form.name, userId: form.userId });
+    if (exists.success) {
+      return {
+        success: false,
+        message: "you have task with the same name",
+      };
     }
     const created = new Model(form);
     await created.save();
@@ -101,6 +101,7 @@ const create = async (form) => {
     };
   } catch (error) {
     return {
+      
       success: false,
       message: "something went wrong",
       error: error,
