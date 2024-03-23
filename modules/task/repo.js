@@ -2,7 +2,7 @@ const Model = require("./model");
 
 const isExists = async (query) => {
   if (query) {
-    const response = Model.findOne(query);
+    const response = await Model.findOne(query);
     if (response) {
       return {
         success: true,
@@ -12,7 +12,7 @@ const isExists = async (query) => {
     } else {
       return {
         success: false,
-        message: "Model not found",
+        message: "task not found",
         status: 401,
       };
     }
@@ -33,11 +33,17 @@ const get = async (query) => {
   else return { message: "you have to send a query" };
 };
 
-const update = async (id, form) => {
-  const ifExists = await isExists({ _id: id });
+const update = async (query, form) => {
+  const ifExists = await isExists(query);
   if (ifExists.success) {
     try {
-      const updated = await Model.updateOne({ _id: id }, form);
+      if(ifExists.record.name == form?.name){
+        return {
+          success : false ,
+          message : "you have task with the same name"
+        }
+      }
+      const updated = await Model.findByIdAndUpdate(query, form , {new : true});
       return {
         success: true,
         record: updated,
@@ -48,7 +54,7 @@ const update = async (id, form) => {
   } else {
     return {
       success: false,
-      message: "Model not found",
+      message: "Task not found",
     };
   }
 };
@@ -73,15 +79,22 @@ const remove = async (id) => {
   } else {
     return {
       success: false,
-      message: "Model not found",
+      message: "task not found",
     };
   }
 };
 
 const create = async (form) => {
   try {
+    const exists = await isExists({ name : form.name , userId : form.userId})
+    if(exists.success){
+   return {
+    success: false,
+    message : "you have task with the same name",
+  }
+    }
     const created = new Model(form);
-    created.save()
+    await created.save();
     return {
       success: true,
       record: created,

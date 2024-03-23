@@ -86,6 +86,7 @@ module.exports = {
           .messages({
             "string.required": "please enter your password",
             "string.empty": "password cannot be empty",
+            "any.only" : "password must match"
           }),
           email: joi
           .string()

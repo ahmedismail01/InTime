@@ -37,7 +37,7 @@ const update = async (id, form) => {
   const ifExists = await isExists({ _id: id });
   if (ifExists.success) {
     try {
-      const updated = await Model.updateOne({ _id: id }, form);
+      const updated = await Model.findByIdAndUpdate({ _id: id }, form ,{new : true});
       return {
         success: true,
         record: updated,

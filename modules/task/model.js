@@ -4,6 +4,7 @@ var taskSchema = new Schema({
   name: {
     type: String,
     required: true,
+    unique : true
   },
   disc: {
     type: String,

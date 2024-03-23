@@ -1,8 +1,8 @@
 const app = require("express").Router();
-const controller = require("../../controller/auth/auth");
-const { checkAuth } = require("../../utils/checkAuth");
-const { login, register ,resetpassword,onlyEmailWanted } = require("../../helpers/validation/auth");
-const validate = require("../../utils/common.validate");
+const controller = require("../controller/auth/auth");
+const { checkAuth } = require("../utils/checkAuth");
+const { login, register ,resetpassword,onlyEmailWanted } = require("../helpers/validation/auth");
+const validate = require("../utils/common.validate");
 
 
 app.post("/signup", validate(register), controller.signUp);

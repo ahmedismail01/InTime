@@ -42,7 +42,7 @@ const create = async (form) => {
 const update = async (query, form) => {
   const isUserExists = await isExists(query);
   if (isUserExists.success) {
-    const user = await User.updateOne(query, form);
+    const user = await User.findByIdAndUpdate(query, form , {new : true});
     return {
       success: true,
       record: user,
