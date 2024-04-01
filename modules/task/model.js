@@ -13,20 +13,21 @@ var taskSchema = new Schema({
     type: Date,
   },
   startAt: Date,
-  end: Date,
+  endAt: Date,
   priority: {
     type: Number,
   },
   tag: {
     type: String,
   },
-  isFinished: {
+  completed: {
     type: Boolean,
+    default : false,
   },
   steps: [
     {
       stepDisc: String,
-      completed: Boolean,
+      completed:{type : Boolean , default : false},
     },
   ],
   groupId: { type: mongoose.SchemaTypes.ObjectId },

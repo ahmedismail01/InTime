@@ -10,12 +10,9 @@ var chat = new Schema({
   admin: {
     type: Schema.Types.ObjectId
   },
-  policy1: {
-    isChatOn: {
-      type: Boolean
-    },
-    chatOnlyForAdmin: {
-      type: Boolean
-    }
+  policy: {
+    chatPolicy : String,
   }
 });
+
+module.exports = model = mongoose.model("chat" , chat)

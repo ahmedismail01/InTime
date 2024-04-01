@@ -25,8 +25,13 @@ const isExists = async (query) => {
 };
 
 const list = async (query) => {
-  if (query) return await Model.find(query);
-  else return await Model.find({});
+  try{
+    if (query) return await Model.find(query);
+    else return await Model.find({});
+  }catch(err){
+    console.log(err)
+  }
+ 
 };
 const get = async (query) => {
   if (query) return await isExists(query);
