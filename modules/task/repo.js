@@ -65,7 +65,8 @@ const update = async (query, form) => {
 };
 
 const remove = async (id) => {
-  if (await isExists({ _id: id })) {
+  const ifExists = await isExists({ _id: id })
+  if (ifExists.success) {
     try {
       const deleted = await Model.deleteOne({ _id: id });
 
