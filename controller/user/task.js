@@ -1,8 +1,6 @@
 const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
-const scheduleTasks = require('../../helpers/scheduler/tasks')
-
-
+const scheduleTasks = require("../../helpers/scheduler/tasks");
 
 const createTask = async (req, res) => {
   const user = req.user;
@@ -10,18 +8,31 @@ const createTask = async (req, res) => {
   form.userId = user.id;
   form.createdAt = new Date(Date.now());
   const created = await repo.create(form);
-  scheduleTasks()
+  scheduleTasks();
   res.json(created);
-
 };
 
 const getUserTasks = async (req, res) => {
-  const tasks = await repo.list({ userId: req.user.id });
-  res.json(
-    tasks
-      ? { success: true, record: tasks }
-      : { success: false, message: "you dont have any tasks" }
-  );
+  req.query.userId = req.user.id;
+  const {page , size} = req?.query
+  delete req.query.page;
+  delete req.query.size;
+  const tasks = await repo.list(req.query);
+  if (tasks) {
+    if (page && size) {
+      const paginated = paginate(Number(size), Number(page), tasks);
+      res.json({
+        success: true,
+        record: paginated.paginatedItems,
+        previousPage: paginated.previousPage,
+        nextPage: paginated.nextPage,
+      });
+    } else {
+      res.json({ success: true, record: tasks });
+    }
+  } else {
+    res.json({ success: false, message: "you dont have any tasks" });
+  }
 };
 const getUserTasksPaginated = async (req, res) => {
   const tasks = await repo.list({ userId: req.user.id });
@@ -55,7 +66,7 @@ const updateTask = async (req, res) => {
     },
     form
   );
-  scheduleTasks()
+  scheduleTasks();
 
   res.json(success ? { success, record } : { success, message });
 };
@@ -66,7 +77,7 @@ const terminateTask = async (req, res) => {
     _id: id,
     userId: req.user.id,
   });
-  scheduleTasks()
+  scheduleTasks();
   res.json(success ? { success, record } : { success, message });
 };
 

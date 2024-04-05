@@ -4,7 +4,7 @@ var taskSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique : true
+    unique: true,
   },
   disc: {
     type: String,
@@ -22,12 +22,12 @@ var taskSchema = new Schema({
   },
   completed: {
     type: Boolean,
-    default : false,
+    default: false,
   },
   steps: [
     {
       stepDisc: String,
-      completed:{type : Boolean , default : false},
+      completed: { type: Boolean, default: false },
     },
   ],
   groupId: { type: mongoose.SchemaTypes.ObjectId },
