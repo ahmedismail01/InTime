@@ -1,4 +1,3 @@
-
 const User = require("./model");
 const bcrypt = require("bcrypt");
 
@@ -18,71 +17,87 @@ const isExists = async (query) => {
 };
 
 const list = async (query) => {
-  if (query) return await User.find(query);
-  else return await User.find({});
+  try {
+    if (query) return await User.find(query);
+    else return await User.find({});
+  } catch (err) {
+    console.log("error getting users : " + err);
+  }
 };
+
 const get = async (query) => {
-  if (query) return await isExists(query);
-  else return { message: "you have to send a query" };
+  try {
+    if (query) return await isExists(query);
+    else return { message: "you have to send a query" };
+  } catch (err) {
+    console.log("error getting user : " + err);
+  }
 };
+
 const create = async (form) => {
-  const email = await isExists({ email: form.email });
-  if (email.success)
-    return { success: false, message: "this email already exists" };
-  else {
+  try {
+    const email = await isExists({ email: form.email });
+    if (email.success) {
+      return { success: false, message: "this email already exists" };
+    }
     const user = new User(form);
     await user.save();
     return {
       success: true,
       record: user,
     };
+  } catch (err) {
+    console.log("error creating new user : " + err);
   }
 };
 
 const update = async (query, form) => {
-  const isUserExists = await isExists(query);
-  if (isUserExists.success) {
-
-    const user = await User.findOneAndUpdate(query, form , {new : true});
+  try {
+    const isUserExists = await isExists(query);
+    if (!isUserExists.success) {
+      return { success: false, message: "user not found" };
+    }
+    const user = await User.findOneAndUpdate(query, form, { new: true });
     return {
       success: true,
       record: user,
     };
-  } else {
-    return { success: false, message: "user not found" };
+  } catch (err) {
+    console.log("error updating user : " + err);
   }
 };
 
 const remove = async (id) => {
-  const isexists = await isExists({ _id: id });
-  if (isexists.success) {
+  try {
+    const isexists = await isExists({ _id: id });
+    if (!isexists.success) {
+      return {
+        message: "user not registered",
+      };
+    }
     await User.findByIdAndDelete({ _id: id });
     return { message: "user deleted" };
-  } else {
-    return {
-      message: "this user doesnt exists",
-    };
+  } catch (err) {
+    console.log("error deleting user : " + err);
   }
 };
 
 const comparePassword = async (email, password) => {
   const user = await isExists({ email: email });
-  if (user.success) {
-    const isMatched = await bcrypt.compare(password, user.record.password);
-    if (isMatched) {
-      return {
-        success: true,
-        record: user.record,
-      };
-    } else {
-      return { success: false, message: "wrong password" };
-    }
-  } else {
+  if (!user.success) {
     return {
       success: false,
-      message: "you have to register first",
+      message: "user not registered",
     };
   }
+  const isMatched = await bcrypt.compare(password, user.record.password);
+  if (!isMatched) {
+    return { success: false, message: "wrong password" };
+  }
+  return {
+    success: true,
+    record: user.record,
+  };
 };
 
 module.exports = {

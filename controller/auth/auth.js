@@ -4,49 +4,36 @@ const {
   update,
   isExists,
 } = require("../../modules/user/repo");
-const jwt = require("jsonwebtoken");
-const { sendMail } = require("../../helpers/nodeMailer");
-
+const sendEmail = require("../../utils/sendMail");
 const bcrypt = require("bcrypt");
+const { createOtp, verifyOtp } = require("../../modules/otp/repo");
 const {
-  createOtp,
-  verifyOtp,
-  remove,
-  removeOtp,
-} = require("../../modules/otp/repo");
-
-const generateOtp = async () => {
-  return Math.floor(Math.random() * (9999 - 1000));
-};
-const createToken = (id, secret, props) => {
-  return jwt.sign(payload, secret, props);
-};
+  signAccessToken,
+  signRefreshToken,
+  verifyToken,
+} = require("../../helpers/jwtHelper");
+const {
+  createRefreshToken,
+  verifyRefreshToken,
+  updateSession,
+  endSession,
+  list,
+  listSessions,
+} = require("../../modules/refreshToken/repo");
 
 const signUp = async (req, res) => {
   const form = req.body;
-  const theToken = await generateOtp();
-  const response = await create(form);
-  if (response.success) {
-    const hashedOtp = await bcrypt.hash(`${theToken}`, 5);
-    const otpForm = {
-      email: form.email,
-      otp: hashedOtp,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 1800,
-    };
-    await createOtp(otpForm);
-    const html = `<h1>${theToken}</h1>`;
-    const title = "activate your account";
-    const text = "click the link to activate your account";
-    sendMail(response.record.email, title, text, html);
-    res.json({
-      email: response.record.email,
-      otp: hashedOtp,
-      message: "check your mail to activate your account",
-    });
-  } else {
-    res.json(response);
+  const user = await create(form);
+  if (!user.success) {
+    res.json(user);
+    return;
   }
+  const token = await createOtp(form.email);
+  sendEmail(user.record.email, "activate your account", token.otp, 20);
+  res.json({
+    email: user.record.email,
+    message: "check your mail to activate your account",
+  });
 };
 
 const logIn = async (req, res) => {
@@ -55,155 +42,126 @@ const logIn = async (req, res) => {
     form.email,
     form.password
   );
-  if (success) {
-    if (record.isActive) {
-      const token = jwt.sign(
-        {
-          user: {
-            id: record._id,
-            isActive: record.isActive,
-          },
-        },
-        process.env.JWT_PRIVATE_KEY
-      );
-      res.json({
-        success,
-        email: record.email,
-        name: record.name,
-        token,
-      });
-    } else {
-      res.json({ success: false, message: "activate your account first" });
-    }
-  } else {
-    res.json({ success, message });
+  if (!success) {
+    res.status(401).json({ success, message });
+    return;
   }
+  if (!record.isActive) {
+    res.status(403).json({
+      success: false,
+      message: "you have to activate your account first",
+    });
+    return;
+  }
+  const accessToken = signAccessToken(record._id);
+  const refreshToken = signRefreshToken(record._id);
+  await createRefreshToken(refreshToken);
+  res.json({
+    success,
+    email: record.email,
+    accessToken,
+    refreshToken,
+  });
 };
 
 const activation = async (req, res) => {
   const email = req.body.email;
   const { code } = req.params;
-  const user = await isExists({ email: email });
-  if (user.success) {
-    if (user.record.isActive == false) {
-      const isOtpValid = await verifyOtp(email, code);
-      if (isOtpValid.success) {
-        await removeOtp({ email: email });
-        const response = await update({ email: email }, { isActive: true });
-        res.json({
-          success: response.success,
-          message: "this account is now active",
-        });
-      } else {
-        res.json({ success: false, message: isOtpValid.message });
-      }
-    } else {
-      res.json({
-        success: false,
-        message: "this account is already activated",
-      });
-    }
-  } else {
-    res.json({ success: false, message: "this account is not registered" });
+  const isOtpValid = await verifyOtp(email, code);
+  if (!isOtpValid.success) {
+    res.json({ success: false, message: isOtpValid.message });
+    return;
   }
+  console.log(isOtpValid);
+  const response = await update({ email: email }, { isActive: true });
+  res.json({
+    success: response.success,
+    message: "this account is now active",
+  });
 };
 
 const resetPassword = async (req, res) => {
   const response = await isExists({ email: req.body.email });
-
-  if (response.success) {
-    if (response.record.isActive == false) {
-      res.json({
-        success: false,
-        message: "you have to activate the account first",
-      });
-    }
-
-    const theToken = await generateOtp();
-    await removeOtp({ email: req.body.email });
-    const hashedOtp = await bcrypt.hash(`${theToken}`, 5);
-
-    const otpForm = {
-      email: req.body.email,
-      otp: hashedOtp,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 1800,
-    };
-
-    const otp = await createOtp(otpForm);
-    const html = `<h1>use this code to reset your password : ${theToken}</h1>`;
-    const title = "reset password";
-    const text = "use this code to reset your account";
-    sendMail(response.record.email, title, text, html);
-    res.json({
-      success: true,
-      otp: hashedOtp,
-      email: req.body.email,
-      message: "check your mail",
-    });
-  } else {
+  if (!response.success) {
     res.json({ success: false, message: "user not registered" });
+    return;
   }
+  if (response.record.isActive == false) {
+    res.json({
+      success: false,
+      message: "you have to activate the account first",
+    });
+    return;
+  }
+  const otpObject = await createOtp(req.body.email);
+  sendEmail(response.record.email, "reset password", otpObject.otp, 20);
+  res.json({ success: true });
 };
 
 const changePassword = async (req, res) => {
   const { otp } = req.params;
   const { password, email } = req.body;
-  const verifiedOtp = await verifyOtp(email, otp);
-  const emailExists = await isExists({ email: email });
-  if (verifiedOtp.success) {
-    if (emailExists.success) {
-      const ifOldPassEqualNewPass = await bcrypt.compare(
-        password,
-        emailExists.record.password
-      );
-      if (!ifOldPassEqualNewPass) {
-        await update(
-          { email: email },
-          { password: await bcrypt.hash(password, 5) }
-        );
-        await removeOtp({ email: email });
-        res.json({ success: true, message: "password changed" });
-      } else {
-        res.json({ success: false, message: "password must be unique" });
-      }
-    } else {
-      res.json({ success: false, message: "this email doesnt exists" });
-    }
-  } else {
-    res.json({ success: false, message: verifiedOtp.message });
+  const validOtp = await verifyOtp(email, otp);
+  if (!validOtp.success) {
+    res.json({ success: false, message: validOtp.message });
+    return;
   }
+  const isMatched = await comparePassword(email, password);
+  if (isMatched.success) {
+    res
+      .status(404)
+      .json({ success: false, message: "password must be unique" });
+    return;
+  }
+  await update({ email: email }, { password: await bcrypt.hash(password, 5) });
+  res.json({ success: true, message: "password changed" });
 };
 
 const resendActivationCode = async (req, res) => {
   const { email, password } = req.body;
   const user = await comparePassword(email, password);
-  if (user.success) {
-    if (user.record.isActive) {
-      res.json({ success: false, message: "user already activated" });
-    } else {
-      const newOtp = await generateOtp();
-      await removeOtp({ email: email });
-      const hashedOtp = await bcrypt.hash(`${newOtp}`, 5);
-      const otpForm = {
-        email: email,
-        otp: hashedOtp,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 1800,
-      };
-      await createOtp(otpForm);
-      const html = `<h1>your code is : ${newOtp}</h1>`;
-      const title = "activate your account";
-      const text = "you have to enter this code to activate your account";
-      sendMail(user.record.email, title, text, html);
-      await update({ _id: user.record._id }, { otp: newOtp });
-      res.json({ success: true, message: "code sent" });
-    }
-  } else {
+  if (!user.success) {
     res.json({ success: false, message: user.message });
+    return;
   }
+  if (user.record.isActive) {
+    res.json({ success: false, message: "user already activated" });
+    return;
+  }
+  const token = await createOtp(email);
+  sendEmail(user.record.email, "activate your account", token.otp, 20);
+  await update({ _id: user.record._id });
+  res.json({ success: true, message: "code sent" });
 };
 
+const refreshAccessToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    res.json({ success: false, message: "invalid request" });
+  }
+  const { success, message, record } = await verifyRefreshToken(refreshToken);
+  if (!success) {
+    res.json({ success, message });
+    return;
+  }
+  const newAccessToken = await signAccessToken(record.userId);
+  const newRefreshToken = await signRefreshToken(record.userId);
+  const updated = await updateSession(refreshToken, newRefreshToken);
+  updated.success
+    ? res.json({ success: false, newAccessToken, newRefreshToken })
+    : res.json({ success: false });
+};
+const signOut = async (req, res) => {
+  const { refreshToken } = req.body;
+  const response = await endSession(refreshToken);
+  res.json(response);
+};
+
+const sessions = async (req, res) => {
+  const { user } = req.user;
+  const userSessions = await listSessions({ userId: user.id });
+  res.json(userSessions);
+};
 module.exports = {
   signUp,
   logIn,
@@ -211,4 +169,7 @@ module.exports = {
   resetPassword,
   changePassword,
   resendActivationCode,
+  refreshAccessToken,
+  signOut,
+  sessions,
 };

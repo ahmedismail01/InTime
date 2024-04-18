@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-exports.sendMail = (reciever, subject, text, html) => {
+exports.sendMail = (reciever, subject,html) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     port: 587,
@@ -11,10 +11,9 @@ exports.sendMail = (reciever, subject, text, html) => {
     },
   });
   const info = transporter.sendMail({
-    from: '"intime" <foo@exmaple.com>',
+    from: 'intime',
     to: reciever,
     subject,
-    text,
     html,
   });
 };

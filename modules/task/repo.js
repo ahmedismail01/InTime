@@ -25,13 +25,12 @@ const isExists = async (query) => {
 };
 
 const list = async (query) => {
-  try{
+  try {
     if (query) return await Model.find(query);
     else return await Model.find({});
-  }catch(err){
-    console.log(err)
+  } catch (err) {
+    console.log(err);
   }
- 
 };
 const get = async (query) => {
   if (query) return await isExists(query);
@@ -65,7 +64,7 @@ const update = async (query, form) => {
 };
 
 const remove = async (id) => {
-  const ifExists = await isExists({ _id: id })
+  const ifExists = await isExists({ _id: id });
   if (ifExists.success) {
     try {
       const deleted = await Model.deleteOne({ _id: id });
@@ -107,7 +106,6 @@ const create = async (form) => {
     };
   } catch (error) {
     return {
-      
       success: false,
       message: "something went wrong",
       error: error,

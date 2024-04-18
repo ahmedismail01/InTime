@@ -31,12 +31,16 @@ module.exports = {
           .empty()
           .required()
           .pattern(
-            new RegExp(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)
+            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
           )
           .messages({
             "string.required": "please enter your password",
             "string.base": "please enter a valid password",
             "string.empty": "password cannot be empty",
+            "object.regex":
+              "min 8 letter password, with at least a symbol, upper and lower case letters and a number",
+            "string.pattern.base":
+              "password should contain : min 8 letters, with at least a symbol, upper and lower case letters and a number",
           }),
       }),
   },
@@ -77,6 +81,10 @@ module.exports = {
             "string.required": "please enter your password",
             "string.base": "please enter a valid password",
             "string.empty": "password cannot be empty",
+            "object.regex":
+              "min 8 letter password, with at least a symbol, upper and lower case letters and a number",
+            "string.pattern.base":
+              "password should contain : min 8 letters, with at least a symbol, upper and lower case letters and a number",
           }),
         confirmPassword: joi
           .string()
@@ -86,9 +94,9 @@ module.exports = {
           .messages({
             "string.required": "please enter your password",
             "string.empty": "password cannot be empty",
-            "any.only" : "password must match"
+            "any.only": "password must match",
           }),
-          email: joi
+        email: joi
           .string()
           .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
           .empty()

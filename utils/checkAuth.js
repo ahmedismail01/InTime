@@ -1,23 +1,19 @@
 const jwt = require("jsonwebtoken");
 exports.checkAuth = (req, res, next) => {
-  if (req.header("authorization")) {
-    const token = req.header("authorization").split(" ")[1];
-    try {
-      const {user} = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+  const token = req.header("authorization").split(" ")[1];
 
-      if (user.isActive) {
-        req.user = { id: user.id, isActive: user.isActive };
-        next();
-      } else {
-        res.json({
-          success: false,
-          message: " you have to activate your account first",
-        });
-      }
-    } catch (err) {
-      res.json({ success: false, message: " invaled token" });
-    }
-  } else {
+  if (!token) {
     res.json({ success: false, message: "you have to send the token" });
+  }
+
+  try {
+    const user = jwt.verify(token, process.env.ACCESS_TOKEN_PRIVATE_KEY);
+    if (!user) {
+      res.json({ success: false, message: "Unauthorized" });
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    res.json({ success: false, message: "Unauthorized" });
   }
 };

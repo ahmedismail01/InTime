@@ -3,8 +3,7 @@ var Schema = mongoose.Schema;
 var taskSchema = new Schema({
   name: {
     type: String,
-    required: true,
-    unique: true,
+    required: [true, "name required"],
   },
   disc: {
     type: String,
@@ -16,9 +15,15 @@ var taskSchema = new Schema({
   endAt: Date,
   priority: {
     type: Number,
+    default: 0,
   },
   tag: {
     type: String,
+  },
+  repeat: {
+    isRepeated: { type: Boolean, default: false },
+    repeadEvery: String,
+    repeatTimes: Number,
   },
   completed: {
     type: Boolean,

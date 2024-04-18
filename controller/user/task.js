@@ -11,10 +11,9 @@ const createTask = async (req, res) => {
   scheduleTasks();
   res.json(created);
 };
-
 const getUserTasks = async (req, res) => {
   req.query.userId = req.user.id;
-  const {page , size} = req?.query
+  const { page, size } = req?.query;
   delete req.query.page;
   delete req.query.size;
   const tasks = await repo.list(req.query);
@@ -34,20 +33,6 @@ const getUserTasks = async (req, res) => {
     res.json({ success: false, message: "you dont have any tasks" });
   }
 };
-const getUserTasksPaginated = async (req, res) => {
-  const tasks = await repo.list({ userId: req.user.id });
-  if (tasks) {
-    const paginated = paginate(
-      Number(req.params.size),
-      Number(req.params.page),
-      tasks
-    );
-    res.json({ success: true, record: paginated });
-  } else {
-    res.json({ success: false, message: "you dont have any tasks" });
-  }
-};
-
 const getTaskById = async (req, res) => {
   const { success, record, message } = await repo.get({
     _id: req.params.id,
@@ -55,7 +40,6 @@ const getTaskById = async (req, res) => {
   });
   res.json(success ? { success, record } : { success, message });
 };
-
 const updateTask = async (req, res) => {
   const { id } = req.params;
   const form = req.body;
@@ -70,7 +54,6 @@ const updateTask = async (req, res) => {
 
   res.json(success ? { success, record } : { success, message });
 };
-
 const terminateTask = async (req, res) => {
   const { id } = req.params;
   const { success, record, message } = await repo.remove({
@@ -87,5 +70,4 @@ module.exports = {
   getTaskById,
   updateTask,
   terminateTask,
-  getUserTasksPaginated,
 };
