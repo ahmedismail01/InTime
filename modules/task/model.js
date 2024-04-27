@@ -10,7 +10,9 @@ var taskSchema = new Schema({
   },
   createdAt: {
     type: Date,
+    default: Date.now(),
   },
+  image: { type: String },
   startAt: Date,
   endAt: Date,
   priority: {

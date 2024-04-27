@@ -24,9 +24,9 @@ const isExists = async (query) => {
   }
 };
 
-const list = async (query) => {
+const list = async (query, sortBy) => {
   try {
-    if (query) return await Model.find(query);
+    if (query) return await Model.find(query).sort(sortBy);
     else return await Model.find({});
   } catch (err) {
     console.log(err);
@@ -63,11 +63,11 @@ const update = async (query, form) => {
   }
 };
 
-const remove = async (id) => {
-  const ifExists = await isExists({ _id: id });
+const remove = async (filter) => {
+  const ifExists = await isExists(filter);
   if (ifExists.success) {
     try {
-      const deleted = await Model.deleteOne({ _id: id });
+      const deleted = await Model.deleteMany(filter);
 
       return {
         success: true,

@@ -67,16 +67,17 @@ const update = async (query, form) => {
   }
 };
 
-const remove = async (id) => {
+const remove = async (filter) => {
   try {
-    const isexists = await isExists({ _id: id });
-    if (!isexists.success) {
+    const exists = await isExists(filter);
+    if (!exists.success) {
       return {
+        success: false,
         message: "user not registered",
       };
     }
-    await User.findByIdAndDelete({ _id: id });
-    return { message: "user deleted" };
+    await User.findByIdAndDelete(filter);
+    return { success: true, message: "user deleted" };
   } catch (err) {
     console.log("error deleting user : " + err);
   }

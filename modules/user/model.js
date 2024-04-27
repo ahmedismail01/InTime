@@ -12,9 +12,9 @@ var user = new Schema({
     type: String,
     required: true,
   },
-  phone : {
-    type : Number,
-    required : true
+  phone: {
+    type: Number,
+    required: true,
   },
   password: {
     type: String,
@@ -33,7 +33,7 @@ var user = new Schema({
       type: Number,
     },
   },
-  profilePhoto: {
+  avatar: {
     type: String,
   },
   level: {

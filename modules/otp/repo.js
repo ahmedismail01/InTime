@@ -21,7 +21,7 @@ const verifyOtp = async (email, otp) => {
   try {
     const exists = await isExists({ email: email });
     if (!exists.success) {
-      return { success: false, message: "Token Expired" };
+      return { success: false, message: "Invalid Token" };
     }
     const compareOtp = await bcrypt.compare(otp, exists.record.otp);
     if (!compareOtp) {

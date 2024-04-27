@@ -113,10 +113,25 @@ const listSessions = async (filter) => {
     console.log("error listing refreshToken sessions : " + error);
   }
 };
+const deleteSessions = async (filter) => {
+  try {
+    await RefreshTokens.deleteOne(filter);
+    return {
+      success: true,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      err,
+    };
+  }
+};
 module.exports = {
   verifyRefreshToken,
   createRefreshToken,
   endSession,
   updateSession,
   listSessions,
+  deleteSessions,
 };

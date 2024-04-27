@@ -31,7 +31,6 @@ const signUp = async (req, res) => {
   const token = await createOtp(form.email);
   sendEmail(user.record.email, "activate your account", token.otp, 20);
   res.json({
-    email: user.record.email,
     message: "check your mail to activate your account",
   });
 };
@@ -72,7 +71,6 @@ const activation = async (req, res) => {
     res.json({ success: false, message: isOtpValid.message });
     return;
   }
-  console.log(isOtpValid);
   const response = await update({ email: email }, { isActive: true });
   res.json({
     success: response.success,
