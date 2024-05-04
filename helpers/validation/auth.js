@@ -73,10 +73,10 @@ module.exports = {
         password: joi
           .string()
           .empty()
-          .pattern(
-            new RegExp(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)
-          )
           .required()
+          .pattern(
+            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+          )
           .messages({
             "string.required": "please enter your password",
             "string.base": "please enter a valid password",

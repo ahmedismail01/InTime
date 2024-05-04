@@ -1,7 +1,6 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt");
-const { number } = require("joi");
 const saltrounds = 5;
 var user = new Schema({
   name: {
@@ -20,19 +19,6 @@ var user = new Schema({
     type: String,
     required: true,
   },
-  tasks: {
-    allTasks: [
-      {
-        type: mongoose.SchemaTypes.ObjectId,
-      },
-    ],
-    completedTasks: {
-      type: Number,
-    },
-    inCompletedTasks: {
-      type: Number,
-    },
-  },
   avatar: {
     type: String,
   },
@@ -50,13 +36,46 @@ var user = new Schema({
     type: String,
   },
   points: {
-    monthlyPoints: { type: [{ type: Number }] },
-    weeklyPoints: [{ type: Number }],
-    dailyPoints: [{ type: Number }],
-    totalPoints: {
-      type: Number,
-      default: 0,
-    },
+    daily: [
+      {
+        date: {
+          type: Date,
+          required: true,
+        },
+        value: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+    monthly: [
+      {
+        month: {
+          type: Number,
+          required: true,
+        },
+        year: {
+          type: Number,
+          required: true,
+        },
+        value: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+    yearly: [
+      {
+        year: {
+          type: Number,
+          required: true,
+        },
+        value: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
   },
   createdAt: {
     type: Date,

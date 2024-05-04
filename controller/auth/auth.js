@@ -20,7 +20,7 @@ const {
   list,
   listSessions,
 } = require("../../modules/refreshToken/repo");
-
+const OTPLifeSpan = process.env.OTP_LIFESPAN;
 const signUp = async (req, res) => {
   const form = req.body;
   const user = await create(form);
@@ -29,7 +29,7 @@ const signUp = async (req, res) => {
     return;
   }
   const token = await createOtp(form.email);
-  sendEmail(user.record.email, "activate your account", token.otp, 20);
+  sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
   res.json({
     message: "check your mail to activate your account",
   });
@@ -92,7 +92,12 @@ const resetPassword = async (req, res) => {
     return;
   }
   const otpObject = await createOtp(req.body.email);
-  sendEmail(response.record.email, "reset password", otpObject.otp, 20);
+  sendEmail(
+    response.record.email,
+    "reset password",
+    otpObject.otp,
+    OTPLifeSpan
+  );
   res.json({ success: true });
 };
 
@@ -127,7 +132,7 @@ const resendActivationCode = async (req, res) => {
     return;
   }
   const token = await createOtp(email);
-  sendEmail(user.record.email, "activate your account", token.otp, 20);
+  sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
   await update({ _id: user.record._id });
   res.json({ success: true, message: "code sent" });
 };
@@ -146,7 +151,7 @@ const refreshAccessToken = async (req, res) => {
   const newRefreshToken = await signRefreshToken(record.userId);
   const updated = await updateSession(refreshToken, newRefreshToken);
   updated.success
-    ? res.json({ success: false, newAccessToken, newRefreshToken })
+    ? res.json({ success: true, newAccessToken, newRefreshToken })
     : res.json({ success: false });
 };
 const signOut = async (req, res) => {
@@ -156,10 +161,12 @@ const signOut = async (req, res) => {
 };
 
 const sessions = async (req, res) => {
-  const { user } = req.user;
+  const user = req.user;
   const userSessions = await listSessions({ userId: user.id });
   res.json(userSessions);
 };
+
+// const verifyOtp
 module.exports = {
   signUp,
   logIn,

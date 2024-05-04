@@ -21,12 +21,13 @@ const verifyOtp = async (email, otp) => {
   try {
     const exists = await isExists({ email: email });
     if (!exists.success) {
-      return { success: false, message: "Invalid Token" };
+      return { success: false, message: "Invalid OTP" };
     }
     const compareOtp = await bcrypt.compare(otp, exists.record.otp);
     if (!compareOtp) {
-      return { success: false, message: "Invalid Token" };
+      return { success: false, message: "Invalid OTP" };
     }
+    await OTP.deleteOne({ email: email });
     return { success: true, record: otp };
   } catch (error) {
     console.log("error verifing the otp : " + error);

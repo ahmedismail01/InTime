@@ -20,6 +20,8 @@ app.get("/", checkAuth, controller.getUserTasks);
 app.get("/:id", checkAuth, controller.getTaskById);
 app.post("/deleteById/:id", checkAuth, controller.terminateTask);
 app.post("/updateById/:id", checkAuth, controller.updateTask);
+app.post("/completeTask/:taskId", checkAuth, controller.completeTask);
+
 // completeTask
 // completeStep
 

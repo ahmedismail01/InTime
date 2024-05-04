@@ -12,7 +12,7 @@ const isExists = async (query) => {
     } else {
       return {
         success: false,
-        message: "Model not found",
+        message: "group not found",
         status: 401,
       };
     }
@@ -37,7 +37,9 @@ const update = async (id, form) => {
   const ifExists = await isExists({ _id: id });
   if (ifExists.success) {
     try {
-      const updated = await Model.fndOneAndUpdate({ _id: id }, form ,{new : true});
+      const updated = await Model.fndOneAndUpdate({ _id: id }, form, {
+        new: true,
+      });
       return {
         success: true,
         record: updated,

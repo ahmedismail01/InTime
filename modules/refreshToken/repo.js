@@ -113,6 +113,7 @@ const listSessions = async (filter) => {
     console.log("error listing refreshToken sessions : " + error);
   }
 };
+
 const deleteSessions = async (filter) => {
   try {
     await RefreshTokens.deleteOne(filter);

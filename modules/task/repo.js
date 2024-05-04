@@ -13,7 +13,7 @@ const isExists = async (query) => {
       return {
         success: false,
         message: "task not found",
-        status: 401,
+        status: 404,
       };
     }
   } else {
@@ -33,58 +33,69 @@ const list = async (query, sortBy) => {
   }
 };
 const get = async (query) => {
-  if (query) return await isExists(query);
-  else return { message: "you have to send a query" };
+  try {
+    if (query) return await isExists(query);
+    else return { message: "you have to send a query" };
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      status: 500,
+      err: err.message,
+    };
+  }
 };
 
 const update = async (query, form) => {
-  const ifExists = await isExists(query);
-  if (ifExists.success) {
-    try {
+  try {
+    const ifExists = await isExists(query);
+    if (ifExists.success) {
       if (ifExists.record.name == form?.name) {
         return {
           success: false,
           message: "you have task with the same name",
+          status: 400,
         };
       }
       const updated = await Model.findOneAndUpdate(query, form, { new: true });
       return {
         success: true,
         record: updated,
+        status: 201,
       };
-    } catch (err) {
-      console.log(err);
+    } else {
+      return ifExists;
     }
-  } else {
+  } catch (err) {
     return {
       success: false,
-      message: "Task not found",
+      message: "something went wrong",
+      status: 500,
+      err: err.message,
     };
   }
 };
 
 const remove = async (filter) => {
-  const ifExists = await isExists(filter);
-  if (ifExists.success) {
-    try {
+  try {
+    const ifExists = await isExists(filter);
+    if (ifExists.success) {
       const deleted = await Model.deleteMany(filter);
 
       return {
         success: true,
         record: deleted,
+        status: 200,
       };
-    } catch (error) {
-      console.log(error);
-      return {
-        success: false,
-        message: "something went wrong",
-        error: error,
-      };
+    } else {
+      return ifExists;
     }
-  } else {
+  } catch (error) {
     return {
       success: false,
-      message: "task not found",
+      message: "something went wrong",
+      error: error,
+      status: 500,
     };
   }
 };
@@ -96,6 +107,7 @@ const create = async (form) => {
       return {
         success: false,
         message: "you have task with the same name",
+        status: 403,
       };
     }
     const created = new Model(form);
@@ -103,11 +115,13 @@ const create = async (form) => {
     return {
       success: true,
       record: created,
+      status: 201,
     };
   } catch (error) {
     return {
       success: false,
       message: "something went wrong",
+      status: 500,
       error: error,
     };
   }

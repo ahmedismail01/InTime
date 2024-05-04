@@ -1,6 +1,7 @@
 const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
+const userRepo = require("../../modules/user/repo");
 
 const createTask = async (req, res) => {
   const user = req.user;
@@ -9,7 +10,7 @@ const createTask = async (req, res) => {
   form.userId = user.id;
   const created = await repo.create(form);
   scheduleTasks();
-  res.json(created);
+  res.status(created.status).json(created);
 };
 const getUserTasks = async (req, res) => {
   req.query.userId = req.user.id;
@@ -28,10 +29,12 @@ const getUserTasks = async (req, res) => {
         nextPage: paginated.nextPage,
       });
     } else {
-      res.json({ success: true, record: tasks });
+      res.status(200).json({ success: true, record: tasks });
     }
   } else {
-    res.json({ success: false, message: "you dont have any tasks" });
+    res
+      .status(200)
+      .json({ success: false, message: "you dont have any tasks" });
   }
 };
 
@@ -45,7 +48,7 @@ const getTaskById = async (req, res) => {
 const updateTask = async (req, res) => {
   const { id } = req.params;
   const form = req.body;
-  const { success, record, message } = await repo.update(
+  const { success, record, message, status } = await repo.update(
     {
       _id: id,
       userId: req.user.id,
@@ -54,16 +57,40 @@ const updateTask = async (req, res) => {
   );
   scheduleTasks();
 
-  res.json(success ? { success, record } : { success, message });
+  res.status(status).json(success ? { success, record } : { success, message });
 };
 const terminateTask = async (req, res) => {
   const { id } = req.params;
-  const { success, record, message } = await repo.remove({
+  const { success, record, message, status } = await repo.remove({
     _id: id,
     userId: req.user.id,
   });
   scheduleTasks();
-  res.json(success ? { success, record } : { success, message });
+  res.status(status).json(success ? { success, record } : { success, message });
+};
+
+const completeTask = async (req, res) => {
+  const userId = req.user.id;
+  const taskId = req.params.taskId;
+  const task = await repo.get({ _id: taskId, userId: userId });
+  if (!task.success) {
+    return res.status(task.status).json(task);
+  }
+  if (task.record.completed) {
+    return res
+      .status(403)
+      .json({ success: false, message: "task is already completed" });
+  }
+  const updated = await repo.update(
+    { _id: taskId, userId: userId },
+    { completed: true }
+  );
+  if (!task.success) {
+    return res.status(updated.status).json(updated);
+  }
+  const user = await userRepo.addPoints({ _id: userId }, 100);
+
+  res.status(user.status).json(user);
 };
 
 module.exports = {
@@ -72,4 +99,5 @@ module.exports = {
   getTaskById,
   updateTask,
   terminateTask,
+  completeTask,
 };

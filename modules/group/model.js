@@ -1,19 +1,26 @@
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var group = new Schema({
   name: {
-    type: String
+    type: String,
   },
-  members: {
-    type: String
-  },
+  members: [
+    {
+      type: mongoose.Types.ObjectId,
+      role: { type: String, default: "user" },
+    },
+  ],
   photo: {
-    type: String
+    type: String,
   },
-  tasks: {
-    type: String
-  },
+  tasks: [
+    {
+      type: mongoose.Types.ObjectId,
+    },
+  ],
   createdAt: {
-    type: Date
-  }
+    type: Date,
+    default: Date.now(),
+  },
+  chatId: mongoose.Types.ObjectId,
 });

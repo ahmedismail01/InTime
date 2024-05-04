@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 
-exports.sendMail = (reciever, subject,html) => {
+exports.sendMail = (reciever, subject, html) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: "yahoo",
     port: 587,
     secure: false,
     auth: {
@@ -11,7 +11,7 @@ exports.sendMail = (reciever, subject,html) => {
     },
   });
   const info = transporter.sendMail({
-    from: 'intime',
+    from: `"intime" <${process.env.NODEMAILER_EMAIL}>`,
     to: reciever,
     subject,
     html,

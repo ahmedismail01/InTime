@@ -19,5 +19,5 @@ const htmlMaker = (title, otp, otpLifeSpan) => {
 };
 module.exports = sendEmail = async (reciever, title, otp, otpLifeSpan) => {
   const html = htmlMaker(title, otp, otpLifeSpan);
-  sendMail(reciever, title, html);
+  await sendMail(reciever, title, html);
 };

@@ -4,7 +4,20 @@ const refreshTokenRepo = require("../../modules/refreshToken/repo");
 
 const getUser = async (req, res) => {
   const { success, record, message } = await get({ _id: req.user.id });
-  res.json(success ? { success, record } : { success, message });
+  res.json(
+    success
+      ? {
+          success,
+          record: {
+            name: record.name,
+            email: record.email,
+            phone: record.phone,
+            avatar: record.avatar,
+            points: record.points,
+          },
+        }
+      : { success, message }
+  );
 };
 const editUser = async (req, res) => {
   const user = req.user.id;
