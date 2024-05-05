@@ -21,6 +21,7 @@ module.exports = {
           .string()
           .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
           .empty()
+          .required()
           .messages({
             "string.email": "please enter a valid email",
             "string.required": "please enter your email",
@@ -98,6 +99,7 @@ module.exports = {
           }),
         email: joi
           .string()
+          .required()
           .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
           .empty()
           .messages({

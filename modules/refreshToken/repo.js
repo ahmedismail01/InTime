@@ -12,7 +12,7 @@ const isExists = async (query) => {
     };
   return {
     success: false,
-    status: 404,
+    status: 400,
   };
 };
 
@@ -20,22 +20,43 @@ const verifyRefreshToken = async (token) => {
   try {
     const payload = verifyToken(token, process.env.REFRESH_TOKEN_PRIVATE_KEY);
     if (!payload) {
-      return { success: false, message: "Unauthorized" };
+      return {
+        success: false,
+        message: "Unauthorized",
+        status: 401,
+      };
     }
     const exists = await isExists({ userId: payload.id });
     if (!exists.success) {
-      return { success: false, message: "session expired" };
+      return {
+        success: false,
+        message: "session expired",
+        status: exists.status,
+      };
     }
     const compareRefreshTokens = await bcrypt.compare(
       token,
       exists.record.refreshToken
     );
     if (!compareRefreshTokens) {
-      return { success: false, message: "Invalid Token" };
+      return {
+        success: false,
+        message: "Invalid Token",
+        status: 401,
+      };
     }
-    return { success: true, record: exists.record };
-  } catch (error) {
-    console.log("error verifing the RefreshToken : " + error);
+    return {
+      success: true,
+      record: exists.record,
+      status: 200,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      error: err,
+      status: 500,
+    };
   }
 };
 
@@ -43,19 +64,24 @@ const createRefreshToken = async (token) => {
   try {
     const payload = verifyToken(token, process.env.REFRESH_TOKEN_PRIVATE_KEY);
     if (!payload) {
-      return { success: false, message: "Unauthorized" };
+      return { success: false, message: "Unauthorized", status: 401 };
     }
     const refreshToken = await RefreshTokens.create({
       userId: payload.id,
       refreshToken: token,
     });
     if (refreshToken) {
-      return { success: true };
+      return { success: true, status: 200 };
     } else {
-      return { success: false, message: "something went wrong" };
+      return { success: false, message: "something went wrong", status: 500 };
     }
-  } catch (error) {
-    console.log("error creating the RefreshToken : " + error);
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      error: err,
+      status: 500,
+    };
   }
 };
 
@@ -66,7 +92,7 @@ const endSession = async (token) => {
       process.env.REFRESH_TOKEN_PRIVATE_KEY
     );
     if (!payload) {
-      return { success: false, message: "Unauthorized" };
+      return { success: false, message: "Unauthorized", status: 401 };
     }
     const session = await RefreshTokens.findOne({ userId: payload.id });
     if (!session) {
@@ -75,14 +101,20 @@ const endSession = async (token) => {
 
     const compareTokens = await bcrypt.compare(token, session.refreshToken);
     if (!compareTokens) {
-      return { success: false, message: "Unauthorized" };
+      return { success: false, message: "Unauthorized", status: 401 };
     }
     await RefreshTokens.deleteOne({ _id: session._id });
     return {
       success: true,
+      status: 200,
     };
   } catch (err) {
-    console.log("error removing the RefreshToken : " + err);
+    return {
+      success: false,
+      message: "something went wrong",
+      error: err,
+      status: 500,
+    };
   }
 };
 
@@ -93,12 +125,17 @@ const updateSession = async (token) => {
       refreshToken: hashedToken,
     });
     if (updated) {
-      return { success: true };
+      return { success: true, status: 200 };
     } else {
-      return { success: false };
+      return { success: false, status: 400 };
     }
   } catch (error) {
-    console.log("error updating refreshToken session : " + error);
+    return {
+      success: false,
+      message: "something went wrong",
+      error: err,
+      status: 500,
+    };
   }
 };
 
@@ -109,8 +146,13 @@ const listSessions = async (filter) => {
       success: true,
       record: userSessions,
     };
-  } catch (error) {
-    console.log("error listing refreshToken sessions : " + error);
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      error: err,
+      status: 500,
+    };
   }
 };
 
@@ -119,12 +161,14 @@ const deleteSessions = async (filter) => {
     await RefreshTokens.deleteOne(filter);
     return {
       success: true,
+      status: 200,
     };
   } catch (err) {
     return {
       success: false,
       message: "something went wrong",
-      err,
+      error: err,
+      status: 500,
     };
   }
 };

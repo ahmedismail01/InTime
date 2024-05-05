@@ -6,7 +6,7 @@ const {
 } = require("../../modules/user/repo");
 const sendEmail = require("../../utils/sendMail");
 const bcrypt = require("bcrypt");
-const { createOtp, verifyOtp } = require("../../modules/otp/repo");
+const { createOtp, verifyOtp, removeOtp } = require("../../modules/otp/repo");
 const {
   signAccessToken,
   signRefreshToken,
@@ -25,24 +25,24 @@ const signUp = async (req, res) => {
   const form = req.body;
   const user = await create(form);
   if (!user.success) {
-    res.json(user);
+    res.status(user.status).json(user);
     return;
   }
   const token = await createOtp(form.email);
   sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
-  res.json({
+  res.status(user.status).json({
     message: "check your mail to activate your account",
   });
 };
 
 const logIn = async (req, res) => {
   const form = req.body;
-  const { success, record, message } = await comparePassword(
+  const { success, record, message, status } = await comparePassword(
     form.email,
     form.password
   );
   if (!success) {
-    res.status(401).json({ success, message });
+    res.status(status).json({ success, message });
     return;
   }
   if (!record.isActive) {
@@ -55,7 +55,7 @@ const logIn = async (req, res) => {
   const accessToken = signAccessToken(record._id);
   const refreshToken = signRefreshToken(record._id);
   await createRefreshToken(refreshToken);
-  res.json({
+  res.status(status).json({
     success,
     email: record.email,
     accessToken,
@@ -68,11 +68,12 @@ const activation = async (req, res) => {
   const { code } = req.params;
   const isOtpValid = await verifyOtp(email, code);
   if (!isOtpValid.success) {
-    res.json({ success: false, message: isOtpValid.message });
+    res.status(401).json({ success: false, message: isOtpValid.message });
     return;
   }
+  await removeOtp({ email: email });
   const response = await update({ email: email }, { isActive: true });
-  res.json({
+  res.status(200).json({
     success: response.success,
     message: "this account is now active",
   });
@@ -81,11 +82,14 @@ const activation = async (req, res) => {
 const resetPassword = async (req, res) => {
   const response = await isExists({ email: req.body.email });
   if (!response.success) {
-    res.json({ success: false, message: "user not registered" });
+    res.status(response.status).json({
+      success: false,
+      message: "user not registered",
+    });
     return;
   }
   if (response.record.isActive == false) {
-    res.json({
+    res.status(403).json({
       success: false,
       message: "you have to activate the account first",
     });
@@ -98,7 +102,7 @@ const resetPassword = async (req, res) => {
     otpObject.otp,
     OTPLifeSpan
   );
-  res.json({ success: true });
+  res.status(response.status).json({ success: true });
 };
 
 const changePassword = async (req, res) => {
@@ -106,7 +110,7 @@ const changePassword = async (req, res) => {
   const { password, email } = req.body;
   const validOtp = await verifyOtp(email, otp);
   if (!validOtp.success) {
-    res.json({ success: false, message: validOtp.message });
+    res.status(401).json({ success: false, message: validOtp.message });
     return;
   }
   const isMatched = await comparePassword(email, password);
@@ -116,8 +120,14 @@ const changePassword = async (req, res) => {
       .json({ success: false, message: "password must be unique" });
     return;
   }
-  await update({ email: email }, { password: await bcrypt.hash(password, 5) });
-  res.json({ success: true, message: "password changed" });
+  await removeOtp({ email: email });
+  const response = await update(
+    { email: email },
+    { password: await bcrypt.hash(password, 5) }
+  );
+  res
+    .status(response.status)
+    .json({ success: true, message: "password changed" });
 };
 
 const resendActivationCode = async (req, res) => {
@@ -157,13 +167,13 @@ const refreshAccessToken = async (req, res) => {
 const signOut = async (req, res) => {
   const { refreshToken } = req.body;
   const response = await endSession(refreshToken);
-  res.json(response);
+  res.status(response.status).json(response);
 };
 
 const sessions = async (req, res) => {
   const user = req.user;
   const userSessions = await listSessions({ userId: user.id });
-  res.json(userSessions);
+  res.status(userSessions.status).json(userSessions);
 };
 
 // const verifyOtp

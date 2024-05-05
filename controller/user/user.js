@@ -29,8 +29,11 @@ const editUser = async (req, res) => {
     phone,
     avatar,
   };
-  const { success, record, message } = await update({ _id: user }, query);
-  res.json({
+  const { success, record, message, status } = await update(
+    { _id: user },
+    query
+  );
+  res.status(status).json({
     success,
     record: {
       name: record.name,
@@ -49,10 +52,10 @@ const deleteUser = async (req, res) => {
     userId: userId,
   });
   user.success && tasks.success && refreshToken.success
-    ? res.json(user)
-    : res.json({
+    ? res.status(user.status).json(user)
+    : res.status(400).json({
         success: false,
-        messages: [user.message, tasks.message, refreshToken.message],
+        messages: [user?.message, tasks?.message, refreshToken?.message],
       });
 };
 

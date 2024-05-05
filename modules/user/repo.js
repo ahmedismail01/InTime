@@ -12,7 +12,7 @@ const isExists = async (query) => {
   return {
     success: false,
     message: "user not found",
-    status: 404,
+    status: 400,
   };
 };
 
@@ -90,7 +90,7 @@ const remove = async (filter) => {
       return {
         success: false,
         message: "user not registered",
-        status: 404,
+        status: 400,
       };
     }
     await User.findByIdAndDelete(filter);
@@ -111,12 +111,12 @@ const comparePassword = async (email, password) => {
     return {
       success: false,
       message: "user not registered",
-      status: 404,
+      status: 400,
     };
   }
   const isMatched = await bcrypt.compare(password, user.record.password);
   if (!isMatched) {
-    return { success: false, message: "wrong password", status: 400 };
+    return { success: false, message: "wrong password", status: 401 };
   }
   return {
     success: true,
@@ -170,7 +170,6 @@ const addPoints = async (filter, pointsEarned) => {
   const yearlyIndex = record.points.yearly.findIndex(
     (point) => point.year == currentYear
   );
-  console.log(yearlyIndex, monthlyIndex);
   if (yearlyIndex !== -1) {
     record.points.yearly[yearlyIndex].value += pointsEarned;
   } else {

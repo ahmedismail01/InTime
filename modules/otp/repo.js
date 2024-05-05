@@ -27,7 +27,6 @@ const verifyOtp = async (email, otp) => {
     if (!compareOtp) {
       return { success: false, message: "Invalid OTP" };
     }
-    await OTP.deleteOne({ email: email });
     return { success: true, record: otp };
   } catch (error) {
     console.log("error verifing the otp : " + error);

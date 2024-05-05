@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 
 exports.sendMail = (reciever, subject, html) => {
   const transporter = nodemailer.createTransport({
-    service: "yahoo",
+    service: "gmail",
     port: 587,
     secure: false,
     auth: {
