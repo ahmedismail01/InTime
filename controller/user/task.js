@@ -61,9 +61,10 @@ const updateTask = async (req, res) => {
 };
 const terminateTask = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
   const { success, record, message, status } = await repo.remove({
     _id: id,
-    userId: req.user.id,
+    userId: userId,
   });
   scheduleTasks();
   res.status(status).json(success ? { success, record } : { success, message });
@@ -88,7 +89,7 @@ const completeTask = async (req, res) => {
   if (!task.success) {
     return res.status(updated.status).json(updated);
   }
-  const user = await userRepo.addPoints({ _id: userId }, 100);
+  const user = await userRepo.addPoints({ _id: userId }, 10);
 
   res.status(user.status).json(user);
 };

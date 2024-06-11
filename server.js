@@ -9,7 +9,6 @@ const routes = require("./router/index");
 const scheduleTasks = require("./helpers/scheduler/tasks");
 
 scheduleTasks();
-
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());

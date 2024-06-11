@@ -26,7 +26,10 @@ const verifyRefreshToken = async (token) => {
         status: 401,
       };
     }
-    const exists = await isExists({ userId: payload.id });
+    const exists = await isExists({
+      userId: payload.id,
+      createdAt: payload.createdAt,
+    });
     if (!exists.success) {
       return {
         success: false,
@@ -60,7 +63,7 @@ const verifyRefreshToken = async (token) => {
   }
 };
 
-const createRefreshToken = async (token) => {
+const createRefreshToken = async (token, createdAt) => {
   try {
     const payload = verifyToken(token, process.env.REFRESH_TOKEN_PRIVATE_KEY);
     if (!payload) {
@@ -68,6 +71,7 @@ const createRefreshToken = async (token) => {
     }
     const refreshToken = await RefreshTokens.create({
       userId: payload.id,
+      createdAt,
       refreshToken: token,
     });
     if (refreshToken) {
@@ -91,39 +95,57 @@ const endSession = async (token) => {
       token,
       process.env.REFRESH_TOKEN_PRIVATE_KEY
     );
+
     if (!payload) {
       return { success: false, message: "Unauthorized", status: 401 };
     }
+
     const session = await RefreshTokens.findOne({ userId: payload.id });
+
     if (!session) {
-      return { success: false, message: "session expired" };
+      return {
+        success: false,
+        message: "Session expired or not found",
+        status: 401,
+      };
     }
 
     const compareTokens = await bcrypt.compare(token, session.refreshToken);
+
     if (!compareTokens) {
       return { success: false, message: "Unauthorized", status: 401 };
     }
+
     await RefreshTokens.deleteOne({ _id: session._id });
+
     return {
       success: true,
+      message: "Session ended successfully",
       status: 200,
     };
   } catch (err) {
     return {
       success: false,
-      message: "something went wrong",
-      error: err,
+      message: "Something went wrong",
+      error: err.message,
       status: 500,
     };
   }
 };
 
-const updateSession = async (token) => {
+const updateSession = async (token, newToken) => {
   try {
+    const payload = verifyToken(token, process.env.REFRESH_TOKEN_PRIVATE_KEY);
+    if (!payload) {
+      return { success: false, message: "Unauthorized", status: 401 };
+    }
     const hashedToken = await bcrypt.hash(token, 5);
-    const updated = await RefreshTokens.findOneAndUpdate({
-      refreshToken: hashedToken,
-    });
+    const updated = await RefreshTokens.findOneAndUpdate(
+      { userId: payload.id, createdAt: payload.createdAt },
+      {
+        refreshToken: hashedToken,
+      }
+    );
     if (updated) {
       return { success: true, status: 200 };
     } else {
@@ -141,10 +163,13 @@ const updateSession = async (token) => {
 
 const listSessions = async (filter) => {
   try {
-    const userSessions = await RefreshTokens.find(filter);
+    const userSessions = await RefreshTokens.find(filter)
+      .select("-refreshToken")
+      .select("-userId");
     return {
       success: true,
       record: userSessions,
+      status: 200,
     };
   } catch (err) {
     return {

@@ -21,6 +21,7 @@ var user = new Schema({
   },
   avatar: {
     type: String,
+    default: "avatarDefault.jpg",
   },
   level: {
     type: Number,
@@ -76,6 +77,7 @@ var user = new Schema({
         },
       },
     ],
+    totalPoints: { type: Number, default: 0 },
   },
   createdAt: {
     type: Date,
@@ -91,6 +93,12 @@ var user = new Schema({
   role: {
     type: String,
     default: "user",
+  },
+  title: {
+    type: String,
+  },
+  about: {
+    type: String,
   },
 });
 user.pre("save", async function (next) {

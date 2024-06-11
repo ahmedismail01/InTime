@@ -67,7 +67,7 @@ const update = async (query, form) => {
     if (!isUserExists.success) {
       return { success: false, message: "user not found", status: 400 };
     }
-    const user = await User.findOneAndUpdate(query, form, { new: true });
+    const user = await User.findOneAndUpdate(query, form);
     return {
       success: true,
       record: user,
@@ -77,8 +77,9 @@ const update = async (query, form) => {
     console.log("error updating user : " + err);
     return {
       success: false,
-      record: "something went wrong",
+      message: "something went wrong",
       status: 500,
+      err,
     };
   }
 };
@@ -105,8 +106,8 @@ const remove = async (filter) => {
   }
 };
 
-const comparePassword = async (email, password) => {
-  const user = await isExists({ email: email });
+const comparePassword = async (query, password) => {
+  const user = await isExists(query);
   if (!user.success) {
     return {
       success: false,
@@ -114,7 +115,7 @@ const comparePassword = async (email, password) => {
       status: 400,
     };
   }
-  const isMatched = await bcrypt.compare(password, user.record.password);
+  const isMatched = bcrypt.compareSync(password, user.record.password);
   if (!isMatched) {
     return { success: false, message: "wrong password", status: 401 };
   }

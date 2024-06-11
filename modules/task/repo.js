@@ -57,6 +57,18 @@ const update = async (query, form) => {
           status: 400,
         };
       }
+      if (form.startAt || form.endAt) {
+        if (
+          ifExists.record.endAt <= new Date(form.startAt) ||
+          ifExists.record.startAt >= new Date(form.endAt)
+        ) {
+          return {
+            success: false,
+            message: "start date cant be after the end date or the same date",
+            status: 400,
+          };
+        }
+      }
       const updated = await Model.findOneAndUpdate(query, form, { new: true });
       return {
         success: true,

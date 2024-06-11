@@ -21,11 +21,16 @@ const {
   listSessions,
 } = require("../../modules/refreshToken/repo");
 const OTPLifeSpan = process.env.OTP_LIFESPAN;
+
 const signUp = async (req, res) => {
   const form = req.body;
   const user = await create(form);
   if (!user.success) {
-    res.status(user.status).json(user);
+    res.status(user.status).json({
+      success: user.success,
+      message: user.message,
+      error: user.error,
+    });
     return;
   }
   const token = await createOtp(form.email);
@@ -38,7 +43,7 @@ const signUp = async (req, res) => {
 const logIn = async (req, res) => {
   const form = req.body;
   const { success, record, message, status } = await comparePassword(
-    form.email,
+    { email: form.email },
     form.password
   );
   if (!success) {
@@ -52,9 +57,10 @@ const logIn = async (req, res) => {
     });
     return;
   }
+  const createdAt = new Date(Date.now());
   const accessToken = signAccessToken(record._id);
-  const refreshToken = signRefreshToken(record._id);
-  await createRefreshToken(refreshToken);
+  const refreshToken = signRefreshToken(record._id, createdAt);
+  await createRefreshToken(refreshToken, createdAt);
   res.status(status).json({
     success,
     email: record.email,
@@ -64,19 +70,29 @@ const logIn = async (req, res) => {
 };
 
 const activation = async (req, res) => {
-  const email = req.body.email;
-  const { code } = req.params;
-  const isOtpValid = await verifyOtp(email, code);
-  if (!isOtpValid.success) {
-    res.status(401).json({ success: false, message: isOtpValid.message });
-    return;
+  try {
+    const email = req.body.email;
+    const { code } = req.params;
+
+    const isOtpValid = await verifyOtp(email, code);
+    if (!isOtpValid.success) {
+      return res
+        .status(401)
+        .json({ success: false, message: isOtpValid.message });
+    }
+
+    await removeOtp({ email });
+
+    const response = await update({ email }, { isActive: true });
+
+    res.status(200).json({
+      success: response.success,
+      message: "This account is now active",
+    });
+  } catch (error) {
+    console.error("Error during activation:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-  await removeOtp({ email: email });
-  const response = await update({ email: email }, { isActive: true });
-  res.status(200).json({
-    success: response.success,
-    message: "this account is now active",
-  });
 };
 
 const resetPassword = async (req, res) => {
@@ -89,11 +105,10 @@ const resetPassword = async (req, res) => {
     return;
   }
   if (response.record.isActive == false) {
-    res.status(403).json({
+    return res.status(403).json({
       success: false,
       message: "you have to activate the account first",
     });
-    return;
   }
   const otpObject = await createOtp(req.body.email);
   sendEmail(
@@ -113,7 +128,7 @@ const changePassword = async (req, res) => {
     res.status(401).json({ success: false, message: validOtp.message });
     return;
   }
-  const isMatched = await comparePassword(email, password);
+  const isMatched = await comparePassword({ email: email }, password);
   if (isMatched.success) {
     res
       .status(404)
@@ -131,8 +146,8 @@ const changePassword = async (req, res) => {
 };
 
 const resendActivationCode = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await comparePassword(email, password);
+  const { email } = req.body;
+  const user = await isExists({ email: email });
   if (!user.success) {
     res.json({ success: false, message: user.message });
     return;
@@ -149,25 +164,39 @@ const resendActivationCode = async (req, res) => {
 
 const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
+
   if (!refreshToken) {
     res.json({ success: false, message: "invalid request" });
   }
-  const { success, message, record } = await verifyRefreshToken(refreshToken);
+  const { success, message, record, error } = await verifyRefreshToken(
+    refreshToken
+  );
   if (!success) {
-    res.json({ success, message });
+    res.status(400).json({ success, message, error });
     return;
   }
   const newAccessToken = await signAccessToken(record.userId);
-  const newRefreshToken = await signRefreshToken(record.userId);
+  const newRefreshToken = await signRefreshToken(
+    record.userId,
+    record.createdAt
+  );
   const updated = await updateSession(refreshToken, newRefreshToken);
   updated.success
-    ? res.json({ success: true, newAccessToken, newRefreshToken })
-    : res.json({ success: false });
+    ? res
+        .status(updated.status)
+        .json({ success: true, newAccessToken, newRefreshToken })
+    : res.status(updated.status).json({ success: false });
 };
 const signOut = async (req, res) => {
   const { refreshToken } = req.body;
-  const response = await endSession(refreshToken);
-  res.status(response.status).json(response);
+  if (refreshToken) {
+    const response = await endSession(refreshToken);
+    res.status(response.status).json(response);
+  } else {
+    res
+      .status(400)
+      .json({ success: false, message: "you must provide the jwt token" });
+  }
 };
 
 const sessions = async (req, res) => {

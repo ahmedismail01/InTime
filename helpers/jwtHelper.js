@@ -10,10 +10,11 @@ const signAccessToken = (id) => {
     { expiresIn: "300s" }
   );
 };
-const signRefreshToken = (id) => {
+const signRefreshToken = (id, createdAt) => {
   return jwt.sign(
     {
       id,
+      createdAt,
     },
     process.env.REFRESH_TOKEN_PRIVATE_KEY,
     { expiresIn: "7d" }

@@ -13,8 +13,8 @@ var taskSchema = new Schema({
     default: Date.now(),
   },
   image: { type: String },
-  startAt: Date,
-  endAt: Date,
+  startAt: { type: Date, required: true },
+  endAt: { type: Date, required: true },
   priority: {
     type: Number,
     default: 0,

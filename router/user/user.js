@@ -1,11 +1,16 @@
 const app = require("express").Router();
-const { getUser, editUser, deleteUser } = require("../../controller/user/user");
-const { changePassword } = require("../../controller/auth/auth");
+const {
+  getUser,
+  editUser,
+  deleteUser,
+  deleteUserPhoto,
+  changePassword,
+} = require("../../controller/user/user");
 const { checkAuth } = require("../../utils/checkAuth");
 const multer = require("multer");
 const path = require("path");
 const validate = require("../../utils/common.validate");
-const { updateUser } = require("../../helpers/validation/user");
+const { updateUser, newPassword } = require("../../helpers/validation/user");
 const storage = multer.diskStorage({
   destination: "./public/uploads",
   filename: (req, file, cb) => {
@@ -16,14 +21,11 @@ const upload = multer({ storage: storage });
 app.get("/", checkAuth, getUser);
 app.post(
   "/editProfile",
-  [checkAuth, validate(updateUser), upload.single("avatar")],
+  [upload.single("avatar"), validate(updateUser), checkAuth],
   editUser
 );
 app.delete("/deleteUser", checkAuth, deleteUser);
-app.post("/changePassword", checkAuth);
-
-//addPoints
-//validate updateUser
-//deleteTasks when deleteUser
+app.delete("/deleteProfilePhoto", checkAuth, deleteUserPhoto);
+app.post("/changePassword", [checkAuth, validate(newPassword)], changePassword);
 
 module.exports = app;

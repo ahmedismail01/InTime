@@ -4,12 +4,11 @@ const path = require("path");
 app.get("/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, `../public/uploads/${filename}`);
-
   // Attempt to send the file
   res.sendFile(filePath, (err) => {
     if (err) {
-      // Handle the error
       if (err.code === "ENOENT") {
+        // Handle the error
         // File not found
         res.status(404).send("File not found");
       } else {

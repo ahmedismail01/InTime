@@ -4,7 +4,7 @@ const saltrounds = 5;
 const refreshTokenSchema = mongoose.Schema({
   refreshToken: String,
   userId: { type: mongoose.Types.ObjectId },
-  createdAt: { type: Date, default: Date.now() },
+  createdAt: { type: Date },
 });
 
 refreshTokenSchema.pre("save", async function (next) {
