@@ -100,7 +100,10 @@ const endSession = async (token) => {
       return { success: false, message: "Unauthorized", status: 401 };
     }
 
-    const session = await RefreshTokens.findOne({ userId: payload.id });
+    const session = await RefreshTokens.findOne({
+      userId: payload.id,
+      createdAt: payload.createdAt,
+    });
 
     if (!session) {
       return {
