@@ -56,12 +56,7 @@ const deleteUser = async (req, res) => {
   const refreshToken = await refreshTokenRepo.deleteSessions({
     userId: userId,
   });
-  user.success && tasks.success && refreshToken.success
-    ? res.status(user.status).json(user)
-    : res.status(400).json({
-        success: false,
-        messages: [user?.message, tasks?.message, refreshToken?.message],
-      });
+  res.status(user.status).json(user);
 };
 const deleteUserPhoto = async (req, res) => {
   const userId = req.user.id;
