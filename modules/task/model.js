@@ -20,7 +20,8 @@ var taskSchema = new Schema({
     default: 0,
   },
   tag: {
-    type: String,
+    name: String,
+    color: String,
   },
   repeat: {
     isRepeated: { type: Boolean, default: false },

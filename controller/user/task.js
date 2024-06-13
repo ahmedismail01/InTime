@@ -2,6 +2,15 @@ const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
 const userRepo = require("../../modules/user/repo");
+const getTags = (tasks) => {
+  const userTags = [];
+  for (i in tasks) {
+    if (tasks[i].tag.name) {
+      userTags.push(tasks[i].tag);
+    }
+  }
+  return userTags;
+};
 
 const createTask = async (req, res) => {
   const user = req.user;
@@ -19,17 +28,19 @@ const getUserTasks = async (req, res) => {
   delete req.query.size;
   delete req.query.sortBy;
   const tasks = await repo.list(req.query, sortBy);
+  const userTags = getTags(tasks);
   if (tasks) {
     if (page && size) {
       const paginated = paginate(Number(size), Number(page), tasks);
       res.json({
         success: true,
         record: paginated.paginatedItems,
+        tags: userTags,
         previousPage: paginated.previousPage,
         nextPage: paginated.nextPage,
       });
     } else {
-      res.status(200).json({ success: true, record: tasks });
+      res.status(200).json({ success: true, record: tasks, tags: userTags });
     }
   } else {
     res
