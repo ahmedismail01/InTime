@@ -1,4 +1,5 @@
 const {
+  list,
   get,
   update,
   remove,
@@ -56,7 +57,7 @@ const deleteUser = async (req, res) => {
   const refreshToken = await refreshTokenRepo.deleteSessions({
     userId: userId,
   });
-  res.status(user.status).json(user);
+  res.status(user.status).json(user, tasks, refreshToken);
 };
 const deleteUserPhoto = async (req, res) => {
   const userId = req.user.id;
@@ -99,10 +100,19 @@ const changePassword = async (req, res) => {
     .status(updatePassword.status)
     .json(success ? { success } : { success, error, message });
 };
+const getUsersRank = async (req, res) => {
+  const userId = req.user.id;
+  const rankedUser = await list({}, { points: -1 });
+  const myRank = rankedUser.findIndex((user) => user._id == userId);
+  rankedUser
+    ? res.status(200).json({ myRank, rankedUser })
+    : res.status(400).json({ success: false, message: "something went wrong" });
+};
 module.exports = {
   getUser,
   editUser,
   deleteUser,
   deleteUserPhoto,
   changePassword,
+  getUsersRank,
 };

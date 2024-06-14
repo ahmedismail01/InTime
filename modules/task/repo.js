@@ -96,7 +96,7 @@ const remove = async (filter) => {
 
       return {
         success: true,
-        record: deleted,
+        record: ifExists.record,
         status: 200,
       };
     } else {

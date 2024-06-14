@@ -11,16 +11,20 @@ module.exports = {
           "string.required": "please enter your name",
           "string.empty": "name cannot be empty",
         }),
-        phone: joi.string().min(11).max(11).empty().messages({
-          "string.empty": "phone cannot be empty",
-          "string.max": "phone number must be 11 numbers",
-          "string.min": "phone number must be 11 numbers",
-        }),
+        phone: joi
+          .string()
+          .regex(/^[0-9]{11}$/)
+          .required()
+          .messages({
+            "string.required": "please enter your phone",
+            "string.empty": "phone cannot be empty",
+            "string.pattern.base": "phone number must be 11 numbers",
+          }),
         age: joi.number().messages({
           "number.integer": "please enter a valid age",
         }),
-        title: joi.string(),
-        about: joi.string(),
+        title: joi.string().allow("", null),
+        about: joi.string().allow("", null),
       }),
   },
   newPassword: {

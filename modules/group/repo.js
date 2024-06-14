@@ -2,7 +2,7 @@ const Model = require("./model");
 
 const isExists = async (query) => {
   if (query) {
-    const response = Model.findOne(query);
+    const response = await Model.findOne(query);
     if (response) {
       return {
         success: true,
@@ -12,8 +12,8 @@ const isExists = async (query) => {
     } else {
       return {
         success: false,
-        message: "group not found",
-        status: 401,
+        message: "task not found",
+        status: 400,
       };
     }
   } else {
@@ -24,74 +24,97 @@ const isExists = async (query) => {
   }
 };
 
-const list = async (query) => {
-  if (query) return await Model.find(query);
-  else return await Model.find({});
+const list = async (query, sortBy) => {
+  try {
+    if (query) return await Model.find(query).sort(sortBy);
+    else return await Model.find({});
+  } catch (err) {
+    console.log(err);
+  }
 };
 const get = async (query) => {
-  if (query) return await isExists(query);
-  else return { message: "you have to send a query" };
-};
-
-const update = async (id, form) => {
-  const ifExists = await isExists({ _id: id });
-  if (ifExists.success) {
-    try {
-      const updated = await Model.fndOneAndUpdate({ _id: id }, form, {
-        new: true,
-      });
-      return {
-        success: true,
-        record: updated,
-      };
-    } catch (err) {
-      console.log(err);
-    }
-  } else {
+  try {
+    if (query) return await isExists(query);
+    else return { message: "you have to send a query" };
+  } catch (err) {
     return {
       success: false,
-      message: "Model not found",
+      message: "something went wrong",
+      status: 500,
+      err: err.message,
     };
   }
 };
 
-const remove = async (id) => {
-  if (await isExists({ _id: id })) {
-    try {
-      const deleted = await Model.deleteOne({ _id: id });
+const update = async (query, form) => {
+  try {
+    const ifExists = await isExists(query);
+    if (ifExists.success) {
+      const updated = await Model.findOneAndUpdate(query, form, { new: true });
+      return {
+        success: true,
+        record: updated,
+        status: 201,
+      };
+    } else {
+      return ifExists;
+    }
+  } catch (err) {
+    return {
+      success: false,
+      message: "something went wrong",
+      status: 500,
+      err: err.message,
+    };
+  }
+};
+
+const remove = async (filter) => {
+  try {
+    const ifExists = await isExists(filter);
+    if (ifExists.success) {
+      const deleted = await Model.deleteMany(filter);
 
       return {
         success: true,
         record: deleted,
+        status: 200,
       };
-    } catch (error) {
-      console.log(error);
-      return {
-        success: false,
-        message: "something went wrong",
-        error: error,
-      };
+    } else {
+      return ifExists;
     }
-  } else {
+  } catch (error) {
     return {
       success: false,
-      message: "Model not found",
+      message: "something went wrong",
+      error: error,
+      status: 500,
     };
   }
 };
 
 const create = async (form) => {
   try {
+    const exists = await isExists({ name: form.name });
+    if (exists.success) {
+      return {
+        success: false,
+        message: "this name already used",
+        status: 403,
+      };
+    }
     const created = new Model(form);
+    await created.save();
     return {
       success: true,
       record: created,
+      status: 201,
     };
   } catch (error) {
-    console.log(error);
     return {
       success: false,
       message: "something went wrong",
+      status: 500,
       error: error,
     };
   }

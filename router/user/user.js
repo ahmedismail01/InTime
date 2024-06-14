@@ -5,6 +5,7 @@ const {
   deleteUser,
   deleteUserPhoto,
   changePassword,
+  getUsersRank,
 } = require("../../controller/user/user");
 const { checkAuth } = require("../../utils/checkAuth");
 const multer = require("multer");
@@ -19,6 +20,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 app.get("/", checkAuth, getUser);
+app.get("/getUsersRank", checkAuth, getUsersRank);
 app.post(
   "/editProfile",
   [upload.single("avatar"), validate(updateUser), checkAuth],

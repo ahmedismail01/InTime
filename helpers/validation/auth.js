@@ -11,15 +11,11 @@ module.exports = {
           "string.required": "please enter your name",
           "string.empty": "name cannot be empty",
         }),
-        phone: joi
-          .string()
-          .regex(/^[0-9]{11}$/)
-          .required()
-          .messages({
-            "string.required": "please enter your phone",
-            "string.empty": "phone cannot be empty",
-            "string.pattern.base": "phone number must be 11 numbers",
-          }),
+        phone: joi.string().required().messages({
+          "string.required": "please enter your phone",
+          "string.empty": "phone cannot be empty",
+          "string.pattern.base": "phone number must be 11 numbers",
+        }),
         email: joi
           .string()
           .email({

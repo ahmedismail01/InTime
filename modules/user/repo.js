@@ -16,9 +16,9 @@ const isExists = async (query) => {
   };
 };
 
-const list = async (query) => {
+const list = async (query, sortBy) => {
   try {
-    if (query) return await User.find(query);
+    if (query) return await User.find(query).sort(sortBy).select("-password");
     else return await User.find({});
   } catch (err) {
     console.log("error getting users : " + err);

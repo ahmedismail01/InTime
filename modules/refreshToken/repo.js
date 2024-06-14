@@ -186,7 +186,7 @@ const listSessions = async (filter) => {
 
 const deleteSessions = async (filter) => {
   try {
-    await RefreshTokens.deleteOne(filter);
+    await RefreshTokens.deleteMany(filter);
     return {
       success: true,
       status: 200,

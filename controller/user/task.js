@@ -2,6 +2,7 @@ const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
 const userRepo = require("../../modules/user/repo");
+const userModel = require("../../modules/user/model");
 const getTags = (tasks) => {
   const userTags = [];
   for (i in tasks) {
@@ -13,11 +14,18 @@ const getTags = (tasks) => {
 };
 
 const createTask = async (req, res) => {
-  const user = req.user;
+  const userId = req.user.id;
   const form = req.body;
   form.image = req.file?.filename;
-  form.userId = user.id;
+  form.userId = userId;
+
   const created = await repo.create(form);
+  if (created.success) {
+    await userModel.updateOne(
+      { _id: userId },
+      { $inc: { "tasks.onGoingTasks": 1 } }
+    );
+  }
   scheduleTasks();
   res.status(created.status).json(created);
 };
@@ -77,6 +85,19 @@ const terminateTask = async (req, res) => {
     _id: id,
     userId: userId,
   });
+  if (success) {
+    if (record.completed == true) {
+      const user = await userModel.updateOne(
+        { _id: userId },
+        { $inc: { "tasks.completedTasks": -1 } }
+      );
+    } else {
+      const user = await userModel.updateOne(
+        { _id: userId },
+        { $inc: { "tasks.onGoingTasks": -1 } }
+      );
+    }
+  }
   scheduleTasks();
   res.status(status).json(success ? { success, record } : { success, message });
 };
@@ -96,6 +117,10 @@ const completeTask = async (req, res) => {
   const updated = await repo.update(
     { _id: taskId, userId: userId },
     { completed: true }
+  );
+  await userModel.updateOne(
+    { _id: userId },
+    { $inc: { "tasks.onGoingTasks": -1, "tasks.completedTasks": 1 } }
   );
   if (!task.success) {
     return res.status(updated.status).json(updated);

@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 var group = new Schema({
   name: {
     type: String,
+    unique : true
   },
   members: [
     {

@@ -82,6 +82,10 @@ var user = new Schema({
   createdAt: {
     type: Date,
   },
+  tasks: {
+    completedTasks: { type: Number, default: 0 },
+    onGoingTasks: { type: Number, default: 0 },
+  },
   notifications: {
     message: {
       type: String,
