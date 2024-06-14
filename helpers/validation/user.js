@@ -13,7 +13,7 @@ module.exports = {
         }),
         phone: joi
           .string()
-          .regex(/^[0-9]{11}$/)
+
           .required()
           .messages({
             "string.required": "please enter your phone",

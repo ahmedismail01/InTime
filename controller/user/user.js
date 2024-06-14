@@ -17,6 +17,7 @@ const getUser = async (req, res) => {
       ? {
           success,
           record: {
+            _id: record._id,
             name: record.name,
             email: record.email,
             phone: record.phone,

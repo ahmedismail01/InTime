@@ -100,9 +100,11 @@ var user = new Schema({
   },
   title: {
     type: String,
+    default: null,
   },
   about: {
     type: String,
+    default: null,
   },
 });
 user.pre("save", async function (next) {
