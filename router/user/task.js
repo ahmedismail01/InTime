@@ -19,6 +19,7 @@ app.post(
   validate(createTask),
   controller.createTask
 );
+app.get("/searchTasks/:text", checkAuth, controller.search);
 app.get("/", checkAuth, controller.getUserTasks);
 app.get("/:id", checkAuth, controller.getTaskById);
 app.post("/deleteById/:id", checkAuth, controller.terminateTask);

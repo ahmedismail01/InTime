@@ -18,6 +18,5 @@ var ProjectSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  chatId: mongoose.Types.ObjectId,
 });
 module.exports = Project = mongoose.model("PROJECT", ProjectSchema);

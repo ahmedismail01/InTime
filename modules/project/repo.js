@@ -12,7 +12,7 @@ const isExists = async (query) => {
     } else {
       return {
         success: false,
-        message: "task not found",
+        message: "project not found",
         status: 400,
       };
     }

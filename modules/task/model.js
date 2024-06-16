@@ -41,5 +41,6 @@ var taskSchema = new Schema({
   groupId: { type: mongoose.SchemaTypes.ObjectId },
   userId: { type: mongoose.SchemaTypes.ObjectId },
 });
+taskSchema.index({ name: "text", tag: "text" });
 
 module.exports = userModel = mongoose.model("task", taskSchema);

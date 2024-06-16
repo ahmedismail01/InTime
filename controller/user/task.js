@@ -3,6 +3,7 @@ const repo = require("./../../modules/task/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
 const userRepo = require("../../modules/user/repo");
 const userModel = require("../../modules/user/model");
+
 const getTags = (tasks) => {
   const userTags = [];
   for (i in tasks) {
@@ -31,11 +32,13 @@ const createTask = async (req, res) => {
 };
 const getUserTasks = async (req, res) => {
   req.query.userId = req.user.id;
-  const { page, size, sortBy } = req?.query;
+  const { page, size, sortBy, sortingType } = req?.query;
   delete req.query.page;
   delete req.query.size;
   delete req.query.sortBy;
-  const tasks = await repo.list(req.query, sortBy);
+  delete req.query.sortingType;
+
+  const tasks = await repo.list(req.query, sortBy, sortingType);
   const userTags = getTags(tasks);
   if (tasks) {
     if (page && size) {
@@ -129,7 +132,12 @@ const completeTask = async (req, res) => {
 
   res.status(user.status).json(user);
 };
-
+const search = async (req, res) => {
+  const userId = req.user.id;
+  const text = req.params.text;
+  const tasks = await repo.search(userId, text);
+  res.json(tasks);
+};
 module.exports = {
   createTask,
   getUserTasks,
@@ -137,4 +145,5 @@ module.exports = {
   updateTask,
   terminateTask,
   completeTask,
+  search,
 };

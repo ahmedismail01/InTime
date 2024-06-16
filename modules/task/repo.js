@@ -1,5 +1,5 @@
 const Model = require("./model");
-
+const mongoose = require("mongoose");
 const isExists = async (query) => {
   if (query) {
     const response = await Model.findOne(query);
@@ -24,14 +24,16 @@ const isExists = async (query) => {
   }
 };
 
-const list = async (query, sortBy) => {
+const list = async (query, sortBy, sortingType) => {
   try {
-    if (query) return await Model.find(query).sort(sortBy);
+    if (query)
+      return await Model.find(query).sort([[`${sortBy}`, Number(sortingType)]]);
     else return await Model.find({});
   } catch (err) {
     console.log(err);
   }
 };
+
 const get = async (query) => {
   try {
     if (query) return await isExists(query);
@@ -138,6 +140,20 @@ const create = async (form) => {
     };
   }
 };
+const search = async (userId, searchString) => {
+  try {
+    return await Model.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          name: { $regex: searchString },
+        },
+      },
+    ]);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   get,
@@ -146,4 +162,5 @@ module.exports = {
   isExists,
   remove,
   update,
+  search,
 };
