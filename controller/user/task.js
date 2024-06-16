@@ -135,9 +135,26 @@ const completeTask = async (req, res) => {
 };
 const search = async (req, res) => {
   const userId = req.user.id;
+  const { page, size } = req?.query;
   const text = req.params.text;
   const tasks = await repo.search(userId, text);
-  res.json(tasks);
+  if (tasks) {
+    if (page && size) {
+      const paginated = paginate(Number(size), Number(page), tasks);
+      res.json({
+        success: true,
+        record: paginated.paginatedItems,
+        previousPage: paginated.previousPage,
+        nextPage: paginated.nextPage,
+      });
+    } else {
+      res.status(200).json({ success: true, record: tasks });
+    }
+  } else {
+    res
+      .status(200)
+      .json({ success: false, message: "you dont have any tasks" });
+  }
 };
 module.exports = {
   createTask,
