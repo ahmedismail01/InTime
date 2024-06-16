@@ -32,6 +32,7 @@ const list = async (query, sortBy) => {
     console.log(err);
   }
 };
+
 const get = async (query) => {
   try {
     if (query) return await isExists(query);
@@ -99,7 +100,7 @@ const create = async (form) => {
     if (exists.success) {
       return {
         success: false,
-        message: "this name already used",
+        message: "this name is already used",
         status: 403,
       };
     }

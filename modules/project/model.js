@@ -1,9 +1,9 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-var group = new Schema({
+var ProjectSchema = new Schema({
   name: {
     type: String,
-    unique : true
+    unique: true,
   },
   members: [
     {
@@ -14,14 +14,10 @@ var group = new Schema({
   photo: {
     type: String,
   },
-  tasks: [
-    {
-      type: mongoose.Types.ObjectId,
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now(),
   },
   chatId: mongoose.Types.ObjectId,
 });
+module.exports = Project = mongoose.model("PROJECT", ProjectSchema);

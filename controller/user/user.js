@@ -25,6 +25,7 @@ const getUser = async (req, res) => {
             points: record.points,
             title: record.title,
             about: record.about,
+            tasks: record.tasks,
           },
         }
       : { success, message }
@@ -67,14 +68,14 @@ const deleteUserPhoto = async (req, res) => {
     fs.unlink(`public/uploads/${user.record.avatar}`, (err) => {
       if (err) {
         console.log(err);
-        res
+        return res
           .status(500)
           .json({ success: "false", message: "something went wrong" });
       }
     });
-    res.status(200).json({ success: "true", message: "deleted" });
+    return res.status(200).json({ success: "true", message: "deleted" });
   } else {
-    res
+    return res
       .status(400)
       .json({ success: "false", message: "you got no profile photo" });
   }

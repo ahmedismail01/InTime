@@ -137,6 +137,7 @@ const addPoints = async (filter, pointsEarned) => {
     };
   }
   const { success, record, message, status } = await isExists(filter);
+
   if (!success) {
     return { success, message, status };
   }
@@ -179,7 +180,11 @@ const addPoints = async (filter, pointsEarned) => {
   record.points.totalPoints += pointsEarned;
 
   // Save the updated user
-  const updatedUser = await record.save();
+  const updatedUser = await User.findByIdAndUpdate(
+    { _id: record._id },
+    { points: record.points },
+    { new: true }
+  ).select("-password");
   return {
     success,
     user: updatedUser,
