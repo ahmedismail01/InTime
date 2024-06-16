@@ -1,5 +1,9 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
+const moment = require("moment-timezone");
+
+const cairoTime = moment.tz("Africa/Cairo");
+
 var taskSchema = new Schema({
   name: {
     type: String,
@@ -10,7 +14,6 @@ var taskSchema = new Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
   },
   image: { type: String },
   startAt: { type: Date, required: true },
@@ -41,6 +44,5 @@ var taskSchema = new Schema({
   groupId: { type: mongoose.SchemaTypes.ObjectId },
   userId: { type: mongoose.SchemaTypes.ObjectId },
 });
-taskSchema.index({ name: "text", tag: "text" });
 
 module.exports = userModel = mongoose.model("task", taskSchema);

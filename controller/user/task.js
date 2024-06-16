@@ -3,7 +3,7 @@ const repo = require("./../../modules/task/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
 const userRepo = require("../../modules/user/repo");
 const userModel = require("../../modules/user/model");
-
+const moment = require("moment-timezone");
 const getTags = (tasks) => {
   const userTags = [];
   for (i in tasks) {
@@ -19,7 +19,8 @@ const createTask = async (req, res) => {
   const form = req.body;
   form.image = req.file?.filename;
   form.userId = userId;
-
+  const cairoTime = moment.tz("Africa/Cairo");
+  form.createdAt = cairoTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ");
   const created = await repo.create(form);
   if (created.success) {
     await userModel.updateOne(
