@@ -62,22 +62,26 @@ const deleteUser = async (req, res) => {
   res.status(user.status).json(user, tasks, refreshToken);
 };
 const deleteUserPhoto = async (req, res) => {
-  const userId = req.user.id;
-  const user = await update({ _id: userId }, { avatar: "avatarDefault.jpg" });
-  if (user.record.avatar != "avatarDefault.jpg") {
-    fs.unlink(`public/uploads/${user.record.avatar}`, (err) => {
-      if (err) {
-        console.log(err);
-        return res
-          .status(500)
-          .json({ success: "false", message: "something went wrong" });
-      }
-    });
-    return res.status(200).json({ success: "true", message: "deleted" });
-  } else {
-    return res
-      .status(400)
-      .json({ success: "false", message: "you got no profile photo" });
+  try {
+    const userId = req.user.id;
+    const user = await update({ _id: userId }, { avatar: "avatarDefault.jpg" });
+    if (user.record.avatar != "avatarDefault.jpg") {
+      fs.unlink(`public/uploads/${user.record.avatar}`, (err) => {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ success: "false", message: "something went wrong" });
+        }
+      });
+      return res.status(200).json({ success: "true", message: "deleted" });
+    } else {
+      return res
+        .status(400)
+        .json({ success: "false", message: "you got no profile photo" });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: "false", message: err.message });
   }
 };
 const changePassword = async (req, res) => {

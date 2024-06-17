@@ -31,7 +31,4 @@ app.post(
 );
 app.post("/completeTask/:taskId", checkAuth, controller.completeTask);
 
-// completeTask
-// completeStep
-
 module.exports = app;

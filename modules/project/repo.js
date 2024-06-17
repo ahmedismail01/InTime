@@ -49,6 +49,19 @@ const get = async (query) => {
 
 const update = async (query, form) => {
   try {
+    if (form.name) {
+      const existingProject = await Model.findOne({ name: form.name });
+      if (
+        existingProject &&
+        existingProject._id.toString() !== query._id.toString()
+      ) {
+        return {
+          success: false,
+          message: "Project name must be unique.",
+          status: 400,
+        };
+      }
+    }
     const ifExists = await isExists(query);
     if (ifExists.success) {
       const updated = await Model.findOneAndUpdate(query, form, { new: true });
@@ -63,7 +76,7 @@ const update = async (query, form) => {
   } catch (err) {
     return {
       success: false,
-      message: "something went wrong",
+      message: "Something went wrong",
       status: 500,
       err: err.message,
     };

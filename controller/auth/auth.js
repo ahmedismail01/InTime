@@ -33,7 +33,7 @@ const signUp = async (req, res) => {
     });
     return;
   }
-  const token = await createOtp(form.email);
+  const token = await createOtp({ email: form.email });
   sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
   res.status(user.status).json({
     message: "check your mail to activate your account",
@@ -74,14 +74,14 @@ const activation = async (req, res) => {
     const email = req.body.email;
     const { code } = req.params;
 
-    const isOtpValid = await verifyOtp(email, code);
+    const isOtpValid = await verifyOtp({ email: email }, code);
     if (!isOtpValid.success) {
       return res
         .status(401)
         .json({ success: false, message: isOtpValid.message });
     }
 
-    await removeOtp({ email });
+    await removeOtp({ email: email });
 
     const response = await update({ email }, { isActive: true });
 
@@ -110,7 +110,7 @@ const resetPassword = async (req, res) => {
       message: "you have to activate the account first",
     });
   }
-  const otpObject = await createOtp(req.body.email);
+  const otpObject = await createOtp({ email: req.body.email });
   sendEmail(
     response.record.email,
     "reset password",
@@ -123,7 +123,7 @@ const resetPassword = async (req, res) => {
 const changePassword = async (req, res) => {
   const { otp } = req.params;
   const { password, email } = req.body;
-  const validOtp = await verifyOtp(email, otp);
+  const validOtp = await verifyOtp({ email: email }, otp);
   if (!validOtp.success) {
     res.status(401).json({ success: false, message: validOtp.message });
     return;
@@ -156,7 +156,7 @@ const resendActivationCode = async (req, res) => {
     res.json({ success: false, message: "user already activated" });
     return;
   }
-  const token = await createOtp(email);
+  const token = await createOtp({ email: email });
   sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
   await update({ _id: user.record._id });
   res.json({ success: true, message: "code sent" });

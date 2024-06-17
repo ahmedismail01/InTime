@@ -7,7 +7,7 @@ var ProjectSchema = new Schema({
   },
   members: [
     {
-      type: mongoose.Types.ObjectId,
+      memberId: { type: mongoose.Types.ObjectId },
       role: { type: String, default: "user" },
     },
   ],

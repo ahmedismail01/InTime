@@ -7,7 +7,7 @@ module.exports = {
       .required()
       .empty()
       .keys({
-        name: joi.string().empty().messages({
+        name: joi.string().empty().required().messages({
           "string.required": "please enter the task name",
           "string.empty": "name cannot be empty",
         }),

@@ -41,7 +41,7 @@ var taskSchema = new Schema({
       completed: { type: Boolean, default: false },
     },
   ],
-  groupId: { type: mongoose.SchemaTypes.ObjectId },
+  projectId: { type: mongoose.SchemaTypes.ObjectId },
   userId: { type: mongoose.SchemaTypes.ObjectId },
 });
 

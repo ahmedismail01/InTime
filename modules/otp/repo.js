@@ -17,9 +17,9 @@ const generateOtp = async () => {
   return Math.floor(Math.random() * 9000 + 1000);
 };
 
-const verifyOtp = async (email, otp) => {
+const verifyOtp = async (query, otp) => {
   try {
-    const exists = await isExists({ email: email });
+    const exists = await isExists(query);
     if (!exists.success) {
       return { success: false, message: "Invalid OTP" };
     }
@@ -33,13 +33,15 @@ const verifyOtp = async (email, otp) => {
   }
 };
 
-const createOtp = async (email) => {
+const createOtp = async (query) => {
   try {
     const token = await generateOtp();
-    await OTP.deleteOne({ email: email });
+    await OTP.deleteOne(query);
     const hashedOtp = await bcrypt.hash(`${token}`, 5);
+
     const otpForm = {
-      email: email,
+      email: query.email,
+      projectId: query.projectId,
       otp: hashedOtp,
     };
     const otp = await OTP.create(otpForm);
