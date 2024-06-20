@@ -137,6 +137,7 @@ const assignTask = async (req, res) => {
   const adminId = req.user.id;
   const { userId, projectId } = req.params;
   const form = req.body;
+  form.projectTask = true;
   const project = await projectRepo.get({ _id: projectId });
   if (!project.success) {
     return res.json(project);
@@ -164,6 +165,12 @@ const assignTask = async (req, res) => {
   form.userId = userId;
   form.projectId = projectId;
   const task = await taskRepo.create(form);
+  if (task.success) {
+    const user = await userRepo.update(
+      { _id: userId },
+      { $inc: { "tasks.onGoingTasks": 1 } }
+    );
+  }
   res.json(task);
 };
 const getProjectTasks = async (req, res) => {
@@ -294,7 +301,47 @@ const removeProjectTask = async (req, res) => {
     _id: taskId,
     projectId: projectId,
   });
+  if (removedTask.success) {
+    if (removedTask.record.completed == true) {
+      const user = await userRepo.update(
+        { _id: removedTask.record.userId },
+        { $inc: { "tasks.completedTasks": -1 } }
+      );
+    } else {
+      const user = await userRepo.update(
+        { _id: removedTask.record.userId },
+        { $inc: { "tasks.onGoingTasks": -1 } }
+      );
+    }
+  }
   res.json(removedTask);
+};
+const removeProjectPhoto = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { projectId } = req.params;
+    const project = await projectRepo.get({ _id: projectId });
+    if (!project.success) {
+      return res.json(project);
+    }
+    const isAdmin = project.record.members.find(
+      (member) =>
+        member.memberId.toString() === adminId && member.role === "admin"
+    );
+    if (!isAdmin) {
+      return res.json({
+        success: false,
+        message: "user is not authorized to remove the project image.",
+      });
+    }
+    const updatedProject = await projectRepo.update(
+      { _id: projectId },
+      { photo: "" }
+    );
+    res.json({ updatedProject });
+  } catch (err) {
+    return res.status(500).json({ success: "false", message: err.message });
+  }
 };
 
 module.exports = {
@@ -311,4 +358,5 @@ module.exports = {
   removeMember,
   removeProject,
   removeProjectTask,
+  removeProjectPhoto,
 };

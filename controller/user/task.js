@@ -158,6 +158,16 @@ const search = async (req, res) => {
       .json({ success: false, message: "you dont have any tasks" });
   }
 };
+const removeTaskPhoto = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { taskId } = req.params;
+    const task = await repo.update({ _id: taskId, userId }, { image: "" });
+    res.status(task.status).json(task);
+  } catch (err) {
+    return res.status(500).json({ success: "false", message: err.message });
+  }
+};
 module.exports = {
   createTask,
   getUserTasks,
@@ -166,4 +176,5 @@ module.exports = {
   terminateTask,
   completeTask,
   search,
+  removeTaskPhoto,
 };

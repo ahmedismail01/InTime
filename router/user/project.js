@@ -49,11 +49,16 @@ app.post(
   validate(updateTask),
   controller.editProjectTask
 );
-app.delete("/:removeProject/:projectId", checkAuth, controller.removeProject);
+app.delete("/removeProject/:projectId", checkAuth, controller.removeProject);
 app.delete(
   "/deleteProjectTask/:projectId/:taskId",
   checkAuth,
   controller.removeProjectTask
+);
+app.delete(
+  "/removeProjectImage/:projectId",
+  checkAuth,
+  controller.removeProjectPhoto
 );
 
 module.exports = app;

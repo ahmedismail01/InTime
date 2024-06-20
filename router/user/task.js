@@ -30,5 +30,6 @@ app.post(
   controller.updateTask
 );
 app.post("/completeTask/:taskId", checkAuth, controller.completeTask);
+app.delete("/removeTaskImage/:taskId", checkAuth, controller.removeTaskPhoto);
 
 module.exports = app;

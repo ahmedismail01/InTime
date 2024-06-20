@@ -43,6 +43,8 @@ var taskSchema = new Schema({
   ],
   projectId: { type: mongoose.SchemaTypes.ObjectId },
   userId: { type: mongoose.SchemaTypes.ObjectId },
+  projectTask: { type: Boolean, default: false },
+  backlog: { type: Boolean, default: false },
 });
 
 module.exports = userModel = mongoose.model("task", taskSchema);
