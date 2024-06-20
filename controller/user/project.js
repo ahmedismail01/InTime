@@ -108,7 +108,6 @@ const generateInviteLink = async (req, res) => {
 const joinProject = async (req, res) => {
   const userId = req.user.id;
   const { otp, projectId } = req.params;
-  console.log(otp);
   const verifyOtp = await otpRepo.verifyOtp({ projectId: projectId }, otp);
   if (!verifyOtp.success) {
     return res.json(verifyOtp);

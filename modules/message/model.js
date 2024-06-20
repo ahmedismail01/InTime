@@ -7,8 +7,8 @@ var message = new Schema({
   message: {
     type: String,
   },
-  createdAt: {},
-  type: {},
+  type: { type: String, default: "text" },
+  timestamp: { type: Date, default: Date.now },
 });
 
-module.exports = model = mongoose.model("message", message);
+module.exports = model = mongoose.model("Message", message);

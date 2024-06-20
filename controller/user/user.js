@@ -68,13 +68,14 @@ const deleteUserPhoto = async (req, res) => {
     if (user.record.avatar != "avatarDefault.jpg") {
       fs.unlink(`public/uploads/${user.record.avatar}`, (err) => {
         if (err) {
-          console.log(err);
-          return res
-            .status(500)
-            .json({ success: "false", message: "something went wrong" });
+          return res.status(500).json({
+            success: "false",
+            message: "something went wrong",
+            error: err,
+          });
         }
+        return res.status(200).json({ success: "true", message: "deleted" });
       });
-      return res.status(200).json({ success: "true", message: "deleted" });
     } else {
       return res
         .status(400)

@@ -53,9 +53,19 @@ const get = async (query) => {
 
 const update = async (query, form) => {
   try {
+    if (form.name) {
+      const exists = await isExists({ name: form.name, userId: query.userId });
+      if (exists.success) {
+        return {
+          success: false,
+          message: "there is a task with the same name in this user tasks",
+          status: 403,
+        };
+      }
+    }
     const ifExists = await isExists(query);
     if (ifExists.success) {
-      if (ifExists.record.name == form?.name) {
+      if (ifExists.record.name === form?.name) {
         return {
           success: false,
           message: "you have task with the same name",

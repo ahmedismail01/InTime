@@ -30,6 +30,12 @@ const verifyOtp = async (query, otp) => {
     return { success: true, record: otp };
   } catch (error) {
     console.log("error verifing the otp : " + error);
+    return {
+      success: false,
+      error: error,
+      message: "something went wrong",
+      status: 500,
+    };
   }
 };
 
@@ -52,6 +58,12 @@ const createOtp = async (query) => {
     }
   } catch (error) {
     console.log("error creating the otp : " + error);
+    return {
+      success: false,
+      error: error,
+      message: "something went wrong",
+      status: 500,
+    };
   }
 };
 
@@ -68,6 +80,12 @@ const removeOtp = async (filter) => {
     }
   } catch (err) {
     console.log("error removing the otp : " + err);
+    return {
+      success: false,
+      error: err,
+      message: "something went wrong",
+      status: 500,
+    };
   }
 };
 

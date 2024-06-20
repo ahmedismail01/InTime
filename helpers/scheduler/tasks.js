@@ -14,17 +14,15 @@ module.exports = scheduleTasks = async () => {
         console.log(`its time to start task "${tasks[i].name}"`);
       });
       schedule.scheduleJob(beforeItEnds, () => {
-        console.log(
-          `The Deadline for "${tasks[i].name}" is coming up soon on ${tasks[i].endAt}`
-        );
+        console.log(`The Deadline for "${tasks[i].name}" is coming up soon`);
       });
       schedule.scheduleJob(endAt, () => {
         console.log(
           `task : "${tasks[i].name}" time is up but you can still catch up`
         );
       });
-    }else{
-      schedule.scheduleJob
+    } else {
+      schedule.scheduleJob;
     }
   }
 };
