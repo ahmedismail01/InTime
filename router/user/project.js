@@ -30,14 +30,30 @@ app.get(
   controller.generateInviteLink
 );
 app.get("/joinProject/:projectId/:otp", checkAuth, controller.joinProject);
-// app.post("removeMember");
+app.delete(
+  "/removeMember/:projectId/:userId",
+  checkAuth,
+  controller.removeMember
+);
 app.post(
   "/assignTask/:projectId/:userId",
   [checkAuth, upload.single("image")],
   validate(createTask),
   controller.assignTask
 );
-// app.get("getGroupTasks");
-// app.post("editGroupTask");
+app.get("/getProjectTasks/:projectId", checkAuth, controller.getProjectTasks);
+app.get("/projectMembers/:projectId", checkAuth, controller.getMemebers);
+app.post(
+  "/editProjectTask/:projectId/:taskId",
+  [checkAuth, upload.single("image")],
+  validate(updateTask),
+  controller.editProjectTask
+);
+app.delete("/:removeProject/:projectId", checkAuth, controller.removeProject);
+app.delete(
+  "/deleteProjectTask/:projectId/:taskId",
+  checkAuth,
+  controller.removeProjectTask
+);
 
 module.exports = app;

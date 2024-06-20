@@ -71,6 +71,8 @@ const getTaskById = async (req, res) => {
 const updateTask = async (req, res) => {
   const { id } = req.params;
   const form = req.body;
+  const image = req?.file?.filename;
+  form.image = image;
   const { success, record, message, status } = await repo.update(
     {
       _id: id,

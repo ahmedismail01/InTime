@@ -26,6 +26,9 @@ const isExists = async (query) => {
 
 const list = async (query, sortBy, sortingType) => {
   try {
+    if (!sortingType) {
+      sortingType = 1;
+    }
     if (query)
       return await Model.find(query).sort([[`${sortBy}`, Number(sortingType)]]);
     else return await Model.find({});
@@ -59,7 +62,7 @@ const update = async (query, form) => {
           status: 400,
         };
       }
-      if (form.startAt || form.endAt) {
+      if (!(form.startAt && form.endAt)) {
         if (
           ifExists.record.endAt <= new Date(form.startAt) ||
           ifExists.record.startAt >= new Date(form.endAt)

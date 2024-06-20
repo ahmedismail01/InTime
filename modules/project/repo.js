@@ -133,6 +133,28 @@ const create = async (form) => {
     };
   }
 };
+const removeMember = async (projectId, memberIdToRemove) => {
+  try {
+    const updatedGroup = await Model.findByIdAndUpdate(
+      projectId,
+      { $pull: { members: { memberId: memberIdToRemove } } },
+      { new: true }
+    );
+    return {
+      success: true,
+      message: "member removed",
+      record: updatedGroup,
+    };
+  } catch (err) {
+    console.error("Error removing member:", err);
+    return {
+      success: false,
+      message: "something went wrong",
+      status: 500,
+      error: err,
+    };
+  }
+};
 
 module.exports = {
   get,
@@ -141,4 +163,5 @@ module.exports = {
   isExists,
   remove,
   update,
+  removeMember,
 };

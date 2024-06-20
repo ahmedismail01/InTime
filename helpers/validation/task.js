@@ -17,6 +17,7 @@ module.exports = {
         tag: joi.object().allow("", null),
         priority: joi.number(),
         steps: joi.array(),
+        image: joi.string().allow("", null),
       }),
   },
   updateTask: {
@@ -29,9 +30,10 @@ module.exports = {
         startAt: joi.date().iso(),
         endAt: joi.date().iso(),
         disc: joi.string().allow("", null),
-        tag: joi.string().allow("", null),
+        tag: joi.object().allow("", null),
         priority: joi.number().greater(-1).less(4),
         steps: joi.array(),
+        image: joi.string().allow("", null),
       }),
   },
 };
