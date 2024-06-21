@@ -11,11 +11,9 @@ const scheduleTasks = require("./helpers/scheduler/tasks");
 const bcrypt = require("bcrypt");
 
 scheduleTasks();
-const corsOptions = {
-  credentials: true, // If you need to send cookies or authorization headers
-};
+
 app.use(morgan("dev"));
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use("/api/v1/", routes);
 

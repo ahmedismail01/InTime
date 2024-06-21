@@ -11,7 +11,12 @@ const userSocketMap = {};
 
 const setupWebSocketServer = (app) => {
   const server = http.createServer(app);
-  io = socketIo(server);
+  io = socketIo(server, {
+    cors: {
+      origin: ["https://in-time-liard.vercel.app", "http://localhost:3000/"],
+      credentials: true,
+    },
+  });
   io.use(async (socket, next) => {
     const token = socket.handshake.headers.accesstoken;
     if (token) {
