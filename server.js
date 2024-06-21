@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const setupWebSocketServer = require("./sockets/index");
+const { setupWebSocketServer } = require("./sockets/index");
 const server = setupWebSocketServer(app);
 const connection = require("./config/dbConnection");
 const cors = require("cors");

@@ -14,6 +14,7 @@ var taskSchema = new Schema({
   },
   createdAt: {
     type: Date,
+    default: Date.now,
   },
   image: { type: String },
   startAt: { type: Date, required: true },

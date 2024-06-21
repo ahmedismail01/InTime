@@ -87,6 +87,13 @@ const updateTask = async (req, res) => {
 const terminateTask = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
+  const exists = await repo.isExists({ _id: id, userId });
+  if (exists.record.projectTask) {
+    return res.json({
+      success: false,
+      message: "user cant delete project Task",
+    });
+  }
   const { success, record, message, status } = await repo.remove({
     _id: id,
     userId: userId,
