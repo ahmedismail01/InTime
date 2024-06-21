@@ -17,7 +17,6 @@ const {
   verifyRefreshToken,
   updateSession,
   endSession,
-  list,
   listSessions,
 } = require("../../modules/refreshToken/repo");
 const OTPLifeSpan = process.env.OTP_LIFESPAN;
@@ -81,8 +80,6 @@ const activation = async (req, res) => {
         .json({ success: false, message: isOtpValid.message });
     }
 
-    await removeOtp({ email: email });
-
     const response = await update({ email }, { isActive: true });
 
     res.status(200).json({
@@ -125,17 +122,14 @@ const changePassword = async (req, res) => {
   const { password, email } = req.body;
   const validOtp = await verifyOtp({ email: email }, otp);
   if (!validOtp.success) {
-    res.status(401).json({ success: false, message: validOtp.message });
-    return;
+    return res.status(401).json({ success: false, message: validOtp.message });
   }
   const isMatched = await comparePassword({ email: email }, password);
   if (isMatched.success) {
-    res
+    return res
       .status(404)
       .json({ success: false, message: "password must be unique" });
-    return;
   }
-  await removeOtp({ email: email });
   const response = await update(
     { email: email },
     { password: await bcrypt.hash(password, 5) }
@@ -149,12 +143,10 @@ const resendActivationCode = async (req, res) => {
   const { email } = req.body;
   const user = await isExists({ email: email });
   if (!user.success) {
-    res.json({ success: false, message: user.message });
-    return;
+    return res.json({ success: false, message: user.message });
   }
   if (user.record.isActive) {
-    res.json({ success: false, message: "user already activated" });
-    return;
+    return res.json({ success: false, message: "user already activated" });
   }
   const token = await createOtp({ email: email });
   sendEmail(user.record.email, "activate your account", token.otp, OTPLifeSpan);
@@ -172,8 +164,7 @@ const refreshAccessToken = async (req, res) => {
     refreshToken
   );
   if (!success) {
-    res.status(400).json({ success, message, error });
-    return;
+    return res.status(400).json({ success, message, error });
   }
   const newAccessToken = await signAccessToken(record.userId);
   const newRefreshToken = await signRefreshToken(
@@ -205,7 +196,6 @@ const sessions = async (req, res) => {
   res.status(userSessions.status).json(userSessions);
 };
 
-// const verifyOtp
 module.exports = {
   signUp,
   logIn,

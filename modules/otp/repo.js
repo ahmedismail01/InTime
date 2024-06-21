@@ -21,7 +21,7 @@ const verifyOtp = async (query, otp) => {
   try {
     const exists = await isExists(query);
     if (!exists.success) {
-      return { success: false, message: "Invalid OTP" };
+      return { success: false, message: "OTP not found" };
     }
     const compareOtp = await bcrypt.compare(otp, exists.record.otp);
     if (!compareOtp) {
@@ -41,10 +41,9 @@ const verifyOtp = async (query, otp) => {
 
 const createOtp = async (query) => {
   try {
-    const token = await generateOtp();
     await OTP.deleteOne(query);
+    const token = await generateOtp();
     const hashedOtp = await bcrypt.hash(`${token}`, 5);
-
     const otpForm = {
       email: query.email,
       projectId: query.projectId,

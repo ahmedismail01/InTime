@@ -68,7 +68,4 @@ const setupWebSocketServer = (app) => {
   return server;
 };
 
-const getIoInstance = () => io;
-const getUserSocketMap = () => userSocketMap;
-
-module.exports = { setupWebSocketServer, getIoInstance, getUserSocketMap };
+module.exports = { setupWebSocketServer };

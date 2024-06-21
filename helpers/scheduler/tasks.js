@@ -1,14 +1,11 @@
 const Task = require("../../modules/task/repo");
 const schedule = require("node-schedule");
 const moment = require("moment");
-// const { getIoInstance, getUserSocketMap } = require("../../sockets/index");
+
 const { getUser } = require("../../controller/user/user");
 module.exports = scheduleTasks = async () => {
-  // const io = getIoInstance();
-  // const userSocketMap = getUserSocketMap();
   const tasks = await Task.list();
   for (let i in tasks) {
-    // const userId = userSocketMap[tasks[i].userId];
     if (tasks[i].endAt >= new Date(Date.now())) {
       const { endAt, startAt } = tasks[i];
       const taskTime = endAt - startAt;
