@@ -4,9 +4,13 @@ var message = new Schema({
   projectId: {
     type: Schema.Types.ObjectId,
   },
+  userId: {
+    type: Schema.Types.ObjectId,
+  },
   message: {
     type: String,
   },
+
   type: { type: String, default: "text" },
   timestamp: { type: Date, default: Date.now },
 });
