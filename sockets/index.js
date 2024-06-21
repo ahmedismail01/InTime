@@ -13,7 +13,7 @@ const setupWebSocketServer = (app) => {
   const server = http.createServer(app);
   io = socketIo(server, {
     cors: {
-      origin: ["https://in-time-liard.vercel.app", "http://localhost:3000/"],
+      origin: ["https://in-time-liard.vercel.app", "http://localhost:3000"],
       credentials: true,
     },
   });
