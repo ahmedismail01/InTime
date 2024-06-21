@@ -252,11 +252,15 @@ const editProjectTask = async (req, res) => {
       message: "user is not authorized to update members tasks.",
     });
   }
-  const updatedTask = await taskRepo.update(
-    { _id: taskId, projectId: projectId },
-    form
-  );
-  res.json(updatedTask);
+  const wantedTask = await taskRepo.get({ _id: taskId, projectId: projectId });
+  if (wantedTask.success) {
+    const updatedTask = await taskRepo.update(
+      { _id: taskId, projectId: projectId, userId: wantedTask.record.userId },
+      form
+    );
+    return res.json(updatedTask);
+  }
+  res.json(wantedTask);
 };
 
 const removeProject = async (req, res) => {

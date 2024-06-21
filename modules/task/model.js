@@ -21,7 +21,7 @@ var taskSchema = new Schema({
   endAt: { type: Date, required: true },
   priority: {
     type: Number,
-    default: 0,
+    default: 3,
   },
   tag: {
     name: String,
