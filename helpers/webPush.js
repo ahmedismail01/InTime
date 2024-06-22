@@ -3,12 +3,12 @@ const User = require("../modules/user/model");
 exports.handleWebPushForTasks = async (task, payload) => {
   try {
     const userId = task.userId;
-    const user = await User.updateOne(
+    const user = await User.findOneAndUpdate(
       { _id: userId },
       { $push: { notifications: { message: JSON.parse(payload).message } } }
     );
     if (!user.webSubscription) {
-      console.log(`${user.email} doesnt have a webSub`);
+      return console.log(`${user.email} doesnt have a webSub`);
     }
     console.log("sending web notification");
     this.sendWebPushNotification(user.webSubscription, payload);

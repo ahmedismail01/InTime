@@ -3,46 +3,66 @@ const schedule = require("node-schedule");
 const moment = require("moment");
 const { handleWebPushForTasks } = require("../webPush");
 
-const { getUser } = require("../../controller/user/user");
-module.exports = scheduleTasks = async () => {
-  const tasks = await Task.list({ completed: false });
-  for (let i in tasks) {
-    if (tasks[i].endAt >= new Date(Date.now())) {
-      const { endAt, startAt } = tasks[i];
-      const taskTime = endAt - startAt;
-      const beforeItEnds = moment(startAt)
-        .add(taskTime * 0.8, "ms")
-        .toDate();
-      schedule.scheduleJob(startAt, () => {
-        console.log(`its time to start task "${tasks[i].name}"`);
+let scheduledTasks = {}; // Track scheduled tasks
 
-        const payload = JSON.stringify({
-          title: "Task started.",
-          message: `its time to start task "${tasks[i].name}"`,
+const scheduleTasks = async () => {
+  try {
+    const tasks = await Task.list({ completed: false });
+
+    for (const task of tasks) {
+      const { endAt, startAt, _id, name } = task;
+
+      // Check if the task is already scheduled
+      if (scheduledTasks[_id]) {
+        continue; // Skip if already scheduled
+      }
+
+      if (endAt >= new Date(Date.now())) {
+        const taskTime = endAt - startAt;
+        const beforeItEnds = moment(startAt)
+          .add(taskTime * 0.8, "ms")
+          .toDate();
+
+        // Schedule job for task start
+        const startJob = schedule.scheduleJob(startAt, () => {
+          console.log(`It's time to start task "${name}"`);
+          const payload = JSON.stringify({
+            title: "Task started.",
+            message: `It's time to start task "${name}"`,
+          });
+          handleWebPushForTasks(task, payload);
         });
-        handleWebPushForTasks(tasks[i], payload);
-      });
-      schedule.scheduleJob(beforeItEnds, () => {
-        console.log(`The Deadline for "${tasks[i].name}" is coming up soon`);
-        const payload = JSON.stringify({
-          title: "Upcoming Task Deadline.",
-          message: `The Deadline for "${tasks[i].name}" is coming up soon`,
+
+        // Schedule job for task nearing deadline
+        const beforeEndJob = schedule.scheduleJob(beforeItEnds, () => {
+          console.log(`The deadline for "${name}" is coming up soon`);
+          const payload = JSON.stringify({
+            title: "Upcoming Task Deadline.",
+            message: `The deadline for "${name}" is coming up soon`,
+          });
+          handleWebPushForTasks(task, payload);
         });
-        handleWebPushForTasks(tasks[i], payload);
-      });
-      schedule.scheduleJob(endAt, async () => {
-        console.log(
-          `task : "${tasks[i].name}" time is up but you can still catch up`
-        );
-        const payload = JSON.stringify({
-          title: "The deadline for the task has arrived.",
-          message: `task : "${tasks[i].name}" time is up but you can still catch up`,
+
+        // Schedule job for task end
+        const endJob = schedule.scheduleJob(endAt, async () => {
+          console.log(`Task: "${name}" time is up, but you can still catch up`);
+          const payload = JSON.stringify({
+            title: "The deadline for the task has arrived.",
+            message: `Task: "${name}" time is up, but you can still catch up`,
+          });
+          handleWebPushForTasks(task, payload);
+          await Task.update({ _id: _id }, { backlog: true });
         });
-        handleWebPushForTasks(tasks[i], payload);
-        await Task.update({ _id: tasks[i].name }, { backlog: true });
-      });
-    } else {
-      await Task.update({ _id: tasks[i]._id }, { backlog: true });
+
+        // Record scheduled jobs
+        scheduledTasks[_id] = { startJob, beforeEndJob, endJob };
+      } else {
+        await Task.update({ _id: task._id }, { backlog: true });
+      }
     }
+  } catch (error) {
+    console.error("Error scheduling tasks:", error);
   }
 };
+
+module.exports = scheduleTasks;
