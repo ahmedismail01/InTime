@@ -8,7 +8,7 @@ exports.handleWebPushForTasks = async (task, payload) => {
       { $push: { notifications: { message: JSON.parse(payload).message } } }
     );
     if (!user.webSubscription) {
-      console.log(`${user.record.email} doesnt have a webSub`);
+      console.log(`${user.email} doesnt have a webSub`);
     }
     console.log("sending web notification");
     this.sendWebPushNotification(user.webSubscription, payload);
