@@ -157,6 +157,7 @@ const search = async (req, res) => {
         nextPage: paginated.nextPage,
       });
     } else {
+      scheduleTasks();
       res.status(200).json({ success: true, record: tasks });
     }
   } else {

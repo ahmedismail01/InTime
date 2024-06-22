@@ -10,6 +10,7 @@ const taskRepo = require("../../modules/task/repo");
 const refreshTokenRepo = require("../../modules/refreshToken/repo");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const { sendWebPushNotification } = require("../../helpers/webPush");
 const getUser = async (req, res) => {
   const { success, record, message } = await get({ _id: req.user.id });
   res.json(
@@ -115,6 +116,14 @@ const getUsersRank = async (req, res) => {
     ? res.status(200).json({ myRank, rankedUser })
     : res.status(400).json({ success: false, message: "something went wrong" });
 };
+const addWebSub = async (req, res) => {
+  const userId = req.user.id;
+  const { subscribtion } = req.body;
+  const sub = await update({ _id: userId }, { webSubscription: subscribtion });
+  res.json(sub);
+};
+
+const getNotifications = (req, res) => {};
 module.exports = {
   getUser,
   editUser,
@@ -122,4 +131,6 @@ module.exports = {
   deleteUserPhoto,
   changePassword,
   getUsersRank,
+  addWebSub,
+  getNotifications,
 };

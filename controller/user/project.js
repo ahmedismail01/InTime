@@ -2,6 +2,8 @@ const projectRepo = require("../../modules/project/repo");
 const otpRepo = require("../../modules/otp/repo");
 const taskRepo = require("../../modules/task/repo");
 const userRepo = require("../../modules/user/repo");
+const scheduleTasks = require("../../helpers/scheduler/tasks");
+
 const createProject = async (req, res) => {
   const adminId = req.user.id;
   const projectName = req.body.name;
@@ -170,6 +172,7 @@ const assignTask = async (req, res) => {
       { $inc: { "tasks.onGoingTasks": 1 } }
     );
   }
+  scheduleTasks();
   res.json(task);
 };
 const getProjectTasks = async (req, res) => {
@@ -258,6 +261,8 @@ const editProjectTask = async (req, res) => {
       { _id: taskId, projectId: projectId, userId: wantedTask.record.userId },
       form
     );
+    scheduleTasks();
+
     return res.json(updatedTask);
   }
   res.json(wantedTask);
@@ -281,6 +286,9 @@ const removeProject = async (req, res) => {
     });
   }
   const removedProject = await projectRepo.remove({ _id: projectId });
+  const removedTasks = await taskRepo.remove({ projectId: projectId });
+  scheduleTasks();
+
   res.json(removedProject);
 };
 const removeProjectTask = async (req, res) => {
@@ -317,6 +325,8 @@ const removeProjectTask = async (req, res) => {
       );
     }
   }
+  scheduleTasks();
+
   res.json(removedTask);
 };
 const removeProjectPhoto = async (req, res) => {

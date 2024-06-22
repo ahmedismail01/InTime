@@ -128,6 +128,60 @@ const comparePassword = async (query, password) => {
 
 const addPoints = async (filter, pointsEarned) => {
   try {
+    const { success, record, message, status } = await isExists(filter);
+
+    if (!success) {
+      return { success, message, status };
+    }
+    const currentDate = new Date();
+    const currentDay = currentDate.toISOString().split("T")[0];
+    const currentMonth = currentDay.slice(5, 7);
+    const currentYear = currentDay.slice(0, 4);
+
+    //daily
+    const dailyIndex = record.points.daily.findIndex(
+      (point) => point.date.toISOString().split("T")[0] === currentDay
+    );
+    if (dailyIndex !== -1) {
+      record.points.daily[dailyIndex].value += pointsEarned;
+    } else {
+      record.points.daily.push({ date: currentDate, value: pointsEarned });
+    }
+    //monthly
+    const monthlyIndex = record.points.monthly.findIndex(
+      (point) => point.month == currentMonth && point.year == currentYear
+    );
+    if (monthlyIndex !== -1) {
+      record.points.monthly[monthlyIndex].value += pointsEarned;
+    } else {
+      record.points.monthly.push({
+        month: currentMonth,
+        year: currentYear,
+        value: pointsEarned,
+      });
+    }
+    //yearly
+    const yearlyIndex = record.points.yearly.findIndex(
+      (point) => point.year == currentYear
+    );
+    if (yearlyIndex !== -1) {
+      record.points.yearly[yearlyIndex].value += pointsEarned;
+    } else {
+      record.points.yearly.push({ year: currentYear, value: pointsEarned });
+    }
+    record.points.totalPoints += pointsEarned;
+
+    // Save the updated user
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: record._id },
+      { points: record.points },
+      { new: true }
+    ).select("-password");
+    return {
+      success,
+      user: updatedUser,
+      status: 200,
+    };
   } catch (err) {
     return {
       success: false,
@@ -136,60 +190,6 @@ const addPoints = async (filter, pointsEarned) => {
       status: 500,
     };
   }
-  const { success, record, message, status } = await isExists(filter);
-
-  if (!success) {
-    return { success, message, status };
-  }
-  const currentDate = new Date();
-  const currentDay = currentDate.toISOString().split("T")[0];
-  const currentMonth = currentDay.slice(5, 7);
-  const currentYear = currentDay.slice(0, 4);
-
-  //daily
-  const dailyIndex = record.points.daily.findIndex(
-    (point) => point.date.toISOString().split("T")[0] === currentDay
-  );
-  if (dailyIndex !== -1) {
-    record.points.daily[dailyIndex].value += pointsEarned;
-  } else {
-    record.points.daily.push({ date: currentDate, value: pointsEarned });
-  }
-  //monthly
-  const monthlyIndex = record.points.monthly.findIndex(
-    (point) => point.month == currentMonth && point.year == currentYear
-  );
-  if (monthlyIndex !== -1) {
-    record.points.monthly[monthlyIndex].value += pointsEarned;
-  } else {
-    record.points.monthly.push({
-      month: currentMonth,
-      year: currentYear,
-      value: pointsEarned,
-    });
-  }
-  //yearly
-  const yearlyIndex = record.points.yearly.findIndex(
-    (point) => point.year == currentYear
-  );
-  if (yearlyIndex !== -1) {
-    record.points.yearly[yearlyIndex].value += pointsEarned;
-  } else {
-    record.points.yearly.push({ year: currentYear, value: pointsEarned });
-  }
-  record.points.totalPoints += pointsEarned;
-
-  // Save the updated user
-  const updatedUser = await User.findByIdAndUpdate(
-    { _id: record._id },
-    { points: record.points },
-    { new: true }
-  ).select("-password");
-  return {
-    success,
-    user: updatedUser,
-    status: 200,
-  };
 };
 
 module.exports = {

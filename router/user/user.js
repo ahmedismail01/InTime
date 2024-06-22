@@ -6,6 +6,8 @@ const {
   deleteUserPhoto,
   changePassword,
   getUsersRank,
+  addWebSub,
+  getNotifications,
 } = require("../../controller/user/user");
 const { checkAuth } = require("../../utils/checkAuth");
 const multer = require("multer");
@@ -29,5 +31,7 @@ app.post(
 app.delete("/deleteUser", checkAuth, deleteUser);
 app.delete("/deleteProfilePhoto", checkAuth, deleteUserPhoto);
 app.post("/changePassword", [checkAuth, validate(newPassword)], changePassword);
+app.post("/subscribe", checkAuth, addWebSub);
+app.get("/getNotifications", checkAuth, getNotifications);
 
 module.exports = app;

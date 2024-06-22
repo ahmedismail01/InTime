@@ -86,14 +86,17 @@ var user = new Schema({
     completedTasks: { type: Number, default: 0 },
     onGoingTasks: { type: Number, default: 0 },
   },
-  notifications: {
-    message: {
-      type: String,
+  notifications: [
+    {
+      message: {
+        type: String,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
     },
-    date: {
-      type: Date,
-    },
-  },
+  ],
   role: {
     type: String,
     default: "user",
@@ -105,6 +108,13 @@ var user = new Schema({
   about: {
     type: String,
     default: null,
+  },
+  webSubscription: {
+    endpoint: { type: String },
+    keys: {
+      p256dh: { type: String },
+      auth: { type: String },
+    },
   },
 });
 user.pre("save", async function (next) {
