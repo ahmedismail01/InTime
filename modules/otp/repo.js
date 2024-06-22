@@ -41,7 +41,6 @@ const verifyOtp = async (query, otp) => {
 
 const createOtp = async (query) => {
   try {
-    await OTP.deleteOne(query);
     const token = await generateOtp();
     const hashedOtp = await bcrypt.hash(`${token}`, 5);
     const otpForm = {
