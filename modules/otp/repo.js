@@ -41,8 +41,9 @@ const verifyOtp = async (query, otp) => {
 
 const createOtp = async (query) => {
   try {
-    const isExists = await isExists(query);
-    if (isExists.success) {
+    const exists = await isExists(query);
+    if (exists.success) {
+      console.log("otp deleted");
       await OTP.deleteOne(query);
     }
     const token = await generateOtp();
