@@ -5,7 +5,7 @@ exports.handleWebPushForTasks = async (task, payload) => {
     const userId = task.userId;
     const user = await User.updateOne(
       { _id: userId },
-      { $push: { notifications: JSON.parse(payload).message } }
+      { $push: { notifications: { message: JSON.parse(payload).message } } }
     );
     if (!user.webSubscription) {
       console.log(`${user.record.email} doesnt have a webSub`);
