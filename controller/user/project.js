@@ -188,7 +188,7 @@ const assignTask = async (req, res) => {
       { $inc: { "tasks.onGoingTasks": 1 } }
     );
   }
-  scheduleTasks();
+
   res.json(task);
 };
 const getProjectTasks = async (req, res) => {
@@ -309,7 +309,6 @@ const removeProject = async (req, res) => {
   }
   const removedProject = await projectRepo.remove({ _id: projectId });
   const removedTasks = await taskRepo.remove({ projectId: projectId });
-  scheduleTasks();
 
   res.json(removedProject);
 };
@@ -348,7 +347,6 @@ const removeProjectTask = async (req, res) => {
       );
     }
   }
-  scheduleTasks();
 
   res.json(removedTask);
 };

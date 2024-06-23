@@ -1,7 +1,6 @@
 const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
 const {
-  scheduleTasks,
   handleTaskCreation,
   handleTaskDeletion,
 } = require("../../helpers/scheduler/tasks");
@@ -163,7 +162,6 @@ const search = async (req, res) => {
         nextPage: paginated.nextPage,
       });
     } else {
-      scheduleTasks();
       res.status(200).json({ success: true, record: tasks });
     }
   } else {
