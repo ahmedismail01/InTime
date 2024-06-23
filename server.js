@@ -7,7 +7,7 @@ const connection = require("./config/dbConnection");
 const cors = require("cors");
 const morgan = require("morgan");
 const routes = require("./router/index");
-const scheduleTasks = require("./helpers/scheduler/tasks");
+const { scheduleTasks } = require("./helpers/scheduler/tasks");
 
 scheduleTasks();
 

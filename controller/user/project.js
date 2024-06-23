@@ -181,6 +181,7 @@ const assignTask = async (req, res) => {
       title: "task assigned",
       message: `You have been given a task from project ${project.record.name}, go check it out`,
     });
+    scheduleTasks.handleTaskCreation(task.record);
     handleWebPushForUsers(userId, payload);
     const user = await userRepo.update(
       { _id: userId },
@@ -248,6 +249,11 @@ const removeMember = async (req, res) => {
     });
   }
   const updatedProject = await projectRepo.removeMember(projectId, userId);
+  const removedTasks = await taskRepo.remove({
+    projectId: projectId,
+    userId: userId,
+  });
+  scheduleTasks();
   res.json(updatedProject);
 };
 const editProjectTask = async (req, res) => {
@@ -276,7 +282,8 @@ const editProjectTask = async (req, res) => {
       { _id: taskId, projectId: projectId, userId: wantedTask.record.userId },
       form
     );
-    scheduleTasks();
+    scheduleTasks.handleTaskDeletion(taskId);
+    scheduleTasks.handleTaskCreation(updatedTask.record);
 
     return res.json(updatedTask);
   }
@@ -328,6 +335,7 @@ const removeProjectTask = async (req, res) => {
     projectId: projectId,
   });
   if (removedTask.success) {
+    scheduleTasks.handleTaskDeletion(taskId);
     if (removedTask.record.completed == true) {
       const user = await userRepo.update(
         { _id: removedTask.record.userId },

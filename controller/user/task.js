@@ -1,6 +1,10 @@
 const paginate = require("../../utils/paginate");
 const repo = require("./../../modules/task/repo");
-const scheduleTasks = require("../../helpers/scheduler/tasks");
+const {
+  scheduleTasks,
+  handleTaskCreation,
+  handleTaskDeletion,
+} = require("../../helpers/scheduler/tasks");
 const userRepo = require("../../modules/user/repo");
 const userModel = require("../../modules/user/model");
 const moment = require("moment-timezone");
@@ -28,7 +32,7 @@ const createTask = async (req, res) => {
       { $inc: { "tasks.onGoingTasks": 1 } }
     );
   }
-  scheduleTasks();
+  handleTaskCreation(created.record);
   res.status(created.status).json(created);
 };
 const getUserTasks = async (req, res) => {
@@ -80,8 +84,9 @@ const updateTask = async (req, res) => {
     },
     form
   );
-  scheduleTasks();
 
+  handleTaskDeletion(id);
+  handleTaskCreation(record);
   res.status(status).json(success ? { success, record } : { success, message });
 };
 const terminateTask = async (req, res) => {
@@ -99,6 +104,7 @@ const terminateTask = async (req, res) => {
     userId: userId,
   });
   if (success) {
+    handleTaskDeletion(record._id);
     if (record.completed == true) {
       const user = await userModel.updateOne(
         { _id: userId },
@@ -111,7 +117,6 @@ const terminateTask = async (req, res) => {
       );
     }
   }
-  scheduleTasks();
   res.status(status).json(success ? { success, record } : { success, message });
 };
 
@@ -131,6 +136,7 @@ const completeTask = async (req, res) => {
     { _id: taskId, userId: userId },
     { completed: true }
   );
+  handleTaskDeletion(taskId);
   await userModel.updateOne(
     { _id: userId },
     { $inc: { "tasks.onGoingTasks": -1, "tasks.completedTasks": 1 } }
