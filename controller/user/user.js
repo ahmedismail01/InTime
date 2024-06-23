@@ -27,7 +27,6 @@ const getUser = async (req, res) => {
             title: record.title,
             about: record.about,
             tasks: record.tasks,
-            notifications: record.notifications,
           },
         }
       : { success, message }
@@ -124,7 +123,19 @@ const addWebSub = async (req, res) => {
   res.json(sub);
 };
 
-const getNotifications = (req, res) => {};
+const getNotifications = async (req, res) => {
+  const { success, record, message } = await get({ _id: req.user.id });
+  res.json(
+    success
+      ? {
+          success,
+          record: {
+            notifications: record.notifications,
+          },
+        }
+      : { success, message }
+  );
+};
 module.exports = {
   getUser,
   editUser,

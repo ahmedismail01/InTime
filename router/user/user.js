@@ -32,5 +32,5 @@ app.delete("/deleteUser", checkAuth, deleteUser);
 app.delete("/deleteProfilePhoto", checkAuth, deleteUserPhoto);
 app.post("/changePassword", [checkAuth, validate(newPassword)], changePassword);
 app.post("/subscribe", checkAuth, addWebSub);
-
+app.get("/getNotifications", checkAuth, getNotifications);
 module.exports = app;
