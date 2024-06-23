@@ -3,6 +3,7 @@ const otpRepo = require("../../modules/otp/repo");
 const taskRepo = require("../../modules/task/repo");
 const userRepo = require("../../modules/user/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
+const { handleWebPushForUsers } = require("../../helpers/webPush");
 
 const createProject = async (req, res) => {
   const adminId = req.user.id;
@@ -128,6 +129,15 @@ const joinProject = async (req, res) => {
     });
   }
   project.record.members.push({ memberId: userId, role: "user" });
+  const payload = JSON.stringify({
+    title: "member joined",
+    message: `Someone joined your project ${project}, go check him out`,
+  });
+
+  const admin = project.record.members.find(
+    (member) => member.role === "admin"
+  );
+  handleWebPushForUsers(admin.memberId, payload);
   const updatedProject = await projectRepo.update(
     { _id: projectId },
     { members: project.record.members }
@@ -167,6 +177,11 @@ const assignTask = async (req, res) => {
   form.projectId = projectId;
   const task = await taskRepo.create(form);
   if (task.success) {
+    const payload = JSON.stringify({
+      title: "task assigned",
+      message: `You have been given a task from project ${project.record.name}, go check it out`,
+    });
+    handleWebPushForUsers(userId, payload);
     const user = await userRepo.update(
       { _id: userId },
       { $inc: { "tasks.onGoingTasks": 1 } }

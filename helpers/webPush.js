@@ -16,6 +16,21 @@ exports.handleWebPushForTasks = async (task, payload) => {
     console.log(error);
   }
 };
+exports.handleWebPushForUsers = async (userId, payload) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { notifications: { message: JSON.parse(payload).message } } }
+    );
+    if (!user.webSubscription) {
+      return console.log(`${user.email} doesnt have a webSub`);
+    }
+    console.log("sending web notification");
+    this.sendWebPushNotification(user.webSubscription, payload);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 exports.sendWebPushNotification = (sub, payload) => {
   webpush.setVapidDetails(
