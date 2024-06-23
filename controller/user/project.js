@@ -131,7 +131,7 @@ const joinProject = async (req, res) => {
   project.record.members.push({ memberId: userId, role: "user" });
   const payload = JSON.stringify({
     title: "member joined",
-    message: `Someone joined your project ${project}, go check him out`,
+    message: `Someone joined your project ${project.record.name}, go check him out`,
   });
 
   const admin = project.record.members.find(
