@@ -31,7 +31,10 @@ const createTask = async (req, res) => {
       { $inc: { "tasks.onGoingTasks": 1 } }
     );
   }
-  handleTaskCreation(created.record);
+  if (created.success) {
+    handleTaskCreation(created.record);
+  }
+
   res.status(created.status).json(created);
 };
 const getUserTasks = async (req, res) => {
@@ -83,9 +86,11 @@ const updateTask = async (req, res) => {
     },
     form
   );
+  if (success) {
+    handleTaskDeletion(id);
+    handleTaskCreation(record);
+  }
 
-  handleTaskDeletion(id);
-  handleTaskCreation(record);
   res.status(status).json(success ? { success, record } : { success, message });
 };
 const terminateTask = async (req, res) => {
