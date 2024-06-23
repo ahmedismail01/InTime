@@ -27,6 +27,7 @@ const getUser = async (req, res) => {
             title: record.title,
             about: record.about,
             tasks: record.tasks,
+            notifications: record.notifications,
           },
         }
       : { success, message }
@@ -118,7 +119,7 @@ const getUsersRank = async (req, res) => {
 };
 const addWebSub = async (req, res) => {
   const userId = req.user.id;
-  const { subscribtion } = req.body;
+  const subscribtion = req.body;
   const sub = await update({ _id: userId }, { webSubscription: subscribtion });
   res.json(sub);
 };
