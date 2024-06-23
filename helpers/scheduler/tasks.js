@@ -63,11 +63,18 @@ const scheduleTask = async (task) => {
 
 const deleteScheduledTask = (_id) => {
   try {
-    const jobs = scheduledTasks[_id];
+    const id = _id.toString();
+    const jobs = scheduledTasks[id];
     if (jobs) {
-      jobs.startJob.cancel();
-      jobs.beforeEndJob.cancel();
-      jobs.endJob.cancel();
+      if (jobs.startJob) {
+        jobs.startJob.cancel();
+      }
+      if (jobs.beforeEndJob) {
+        jobs.beforeEndJob.cancel();
+      }
+      if (jobs.endJob) {
+        jobs.endJob.cancel();
+      }
       delete scheduledTasks[_id];
     }
   } catch (err) {
