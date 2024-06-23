@@ -58,12 +58,16 @@ const scheduleTask = async (task) => {
 };
 
 const deleteScheduledTask = (_id) => {
-  const jobs = scheduledTasks[_id];
-  if (jobs) {
-    jobs.startJob.cancel();
-    jobs.beforeEndJob.cancel();
-    jobs.endJob.cancel();
-    delete scheduledTasks[_id];
+  try {
+    const jobs = scheduledTasks[_id];
+    if (jobs) {
+      jobs.startJob.cancel();
+      jobs.beforeEndJob.cancel();
+      jobs.endJob.cancel();
+      delete scheduledTasks[_id];
+    }
+  } catch (err) {
+    console.error("Error scheduling tasks:", err);
   }
 };
 
