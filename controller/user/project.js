@@ -253,7 +253,7 @@ const removeMember = async (req, res) => {
     projectId: projectId,
     userId: userId,
   });
-  scheduleTasks();
+  scheduleTasks.scheduleTasks();
   res.json(updatedProject);
 };
 const editProjectTask = async (req, res) => {
