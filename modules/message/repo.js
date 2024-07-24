@@ -39,7 +39,7 @@ const get = async (query) => {
 const create = async (query) => {
   try {
     const Message = await Model.create(query);
-    if (Model) {
+    if (Message) {
       return { success: true, record: Message };
     } else {
       return { success: false, message: "something went wrong" };
