@@ -1,4 +1,4 @@
-const { sendMail } = require("../helpers/nodeMailer");
+const { sendMail } = require("../helpers/sendGrid");
 
 const htmlMaker = (title, otp, otpLifeSpan) => {
   html = `
