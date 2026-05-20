@@ -84,7 +84,7 @@ const deleteScheduledTask = (_id) => {
 
 const scheduleTasks = async () => {
   try {
-    const tasks = await Task.list({ completed: false });
+    const tasks = (await Task.list({ completed: false })) || [];
     for (const task of tasks) {
       await scheduleTask(task);
     }
