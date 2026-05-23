@@ -175,7 +175,7 @@ const addPoints = async (filter, pointsEarned) => {
     const updatedUser = await User.findByIdAndUpdate(
       { _id: record._id },
       { points: record.points },
-      { new: true }
+      { returnDocument: "after" }
     ).select("-password");
     return {
       success,

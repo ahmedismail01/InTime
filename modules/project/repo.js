@@ -64,7 +64,9 @@ const update = async (query, form) => {
     }
     const ifExists = await isExists(query);
     if (ifExists.success) {
-      const updated = await Model.findOneAndUpdate(query, form, { new: true });
+      const updated = await Model.findOneAndUpdate(query, form, {
+        returnDocument: "after",
+      });
       return {
         success: true,
         record: updated,
@@ -138,7 +140,7 @@ const removeMember = async (projectId, memberIdToRemove) => {
     const updatedGroup = await Model.findByIdAndUpdate(
       projectId,
       { $pull: { members: { memberId: memberIdToRemove } } },
-      { new: true }
+      { returnDocument: "after" },
     );
     return {
       success: true,

@@ -84,7 +84,9 @@ const update = async (query, form) => {
           };
         }
       }
-      const updated = await Model.findOneAndUpdate(query, form, { new: true });
+      const updated = await Model.findOneAndUpdate(query, form, {
+        returnDocument: "after",
+      });
       return {
         success: true,
         record: updated,
