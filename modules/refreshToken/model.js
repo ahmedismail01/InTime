@@ -7,9 +7,8 @@ const refreshTokenSchema = mongoose.Schema({
   createdAt: { type: Date },
 });
 
-refreshTokenSchema.pre("save", async function (next) {
+refreshTokenSchema.pre("save", async function () {
   this.refreshToken = await bcrypt.hash(this.refreshToken, saltrounds);
-  next();
 });
 
 module.exports = model = mongoose.model("refreshToken", refreshTokenSchema);

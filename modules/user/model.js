@@ -117,8 +117,7 @@ var user = new Schema({
     },
   },
 });
-user.pre("save", async function (next) {
+user.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, saltrounds);
-  next();
 });
 module.exports = userModel = mongoose.model("user", user);

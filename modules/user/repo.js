@@ -52,6 +52,7 @@ const create = async (form) => {
       status: 201,
     };
   } catch (err) {
+    console.log("error creating user : " + err);
     return {
       success: false,
       message: "something went wrong",
