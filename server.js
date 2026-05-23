@@ -9,9 +9,9 @@ const morgan = require("morgan");
 const routes = require("./router/index");
 const { scheduleTasks } = require("./helpers/scheduler/tasks");
 const { limiter } = require("./utils/rateLimiter");
-
 scheduleTasks();
 
+app.set('trust proxy', 1); 
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());

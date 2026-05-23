@@ -30,8 +30,8 @@ const list = async (query, sortBy, sortingType) => {
       sortingType = 1;
     }
     if (query)
-      return await Model.find(query).sort([[`${sortBy}`, Number(sortingType)]]);
-    else return await Model.find({});
+      return await Model.find(query).sort([[`${sortBy}`, Number(sortingType)]]).lean();
+    else return await Model.find({}).lean();
   } catch (err) {
     console.log(err);
   }

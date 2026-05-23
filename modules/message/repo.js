@@ -15,8 +15,8 @@ const isExists = async (query) => {
 
 const list = async (query, sortBy) => {
   try {
-    if (query) return await Model.find(query).sort(sortBy);
-    else return await Model.find({});
+    if (query) return await Model.find(query).sort(sortBy).lean();
+    else return await Model.find({}).lean();
   } catch (err) {
     console.log(err);
   }
