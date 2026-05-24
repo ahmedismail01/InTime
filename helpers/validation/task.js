@@ -60,6 +60,11 @@ module.exports = {
           name: joi.string().allow("", null),
           color: joi.string().allow("", null),
         })
+        .custom((value) => {
+          if (value) {
+            return { $in: value };
+          }
+        })
         .allow("", null),
       priority: joi
         .array()
