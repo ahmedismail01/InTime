@@ -34,8 +34,9 @@ const getUserTasks = async (req, res) => {
   const { page = 1, size = 10, sortBy, sortingType, ...query } = req?.query;
 
   const {
+    error,
     tasks = [],
-    total: totalTasksCount,
+    total: totalTasksCount = 0,
     tags: userTags = [],
   } = await repo.listPaginated(
     query,
@@ -44,6 +45,12 @@ const getUserTasks = async (req, res) => {
     Number(page),
     Number(size),
   );
+
+  if (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "something went wrong" });
+  }
 
   const paginated = paginationResponse(
     Number(size),
@@ -146,11 +153,18 @@ const completeTask = async (req, res) => {
 
   res.status(user.status).json(user);
 };
+
 const search = async (req, res) => {
   const userId = req.user.id;
   const { page = 1, size = 10 } = req?.query;
   const text = req.params.text;
   const tasks = await repo.search(userId, text);
+
+  if (tasks.error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "something went wrong" });
+  }
 
   const paginated = paginationResponse(Number(size), Number(page), tasks);
 
@@ -161,6 +175,7 @@ const search = async (req, res) => {
     nextPage: paginated.nextPage,
   });
 };
+
 const removeTaskPhoto = async (req, res) => {
   try {
     const userId = req.user.id;

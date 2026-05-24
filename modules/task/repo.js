@@ -69,12 +69,16 @@ const listPaginated = async (
       },
     ]);
     return {
+      success: true,
       total: tasks[0]?.metadata[0]?.total,
       tasks: tasks[0]?.data,
       tags: tasks[0]?.tags,
     };
   } catch (err) {
     console.log(err);
+    return {
+      error: err,
+    };
   }
 };
 
@@ -208,6 +212,7 @@ const search = async (userId, searchString) => {
     ]);
   } catch (err) {
     console.log(err);
+    return { error: err };
   }
 };
 
