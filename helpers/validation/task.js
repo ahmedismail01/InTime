@@ -61,7 +61,10 @@ module.exports = {
           color: joi.string().allow("", null),
         })
         .allow("", null),
-      priority: joi.number().greater(-1).less(4),
+      priority: joi
+        .array()
+        .items(joi.number().greater(-1).less(4).allow("", null))
+        .allow("", null),
       page: joi.number().integer().min(1).default(1),
       sortBy: joi.string().allow("", null),
       backlog: joi
