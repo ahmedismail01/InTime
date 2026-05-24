@@ -101,6 +101,23 @@ module.exports = {
       ),
       page: joi.number().integer().min(1).default(1),
       sortBy: joi.string().allow("", null),
+      projectTask: joi
+        .alternatives()
+        .try(
+          joi.boolean(),
+
+          joi
+            .array()
+            .items(joi.boolean())
+            .custom((value) => {
+              if (value?.length) {
+                return { $in: value };
+              }
+
+              return value;
+            }),
+        )
+        .allow("", null),
       backlog: joi
         .alternatives()
         .try(
