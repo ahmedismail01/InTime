@@ -14,7 +14,10 @@ module.exports = {
         startAt: joi.date().empty().iso().required(),
         endAt: joi.date().empty().iso().greater(joi.ref("startAt")).required(),
         disc: joi.string().allow("", null),
-        tag: joi.object().allow("", null),
+        tag: joi
+          .object()
+          .allow("", null)
+          .keys({ name: joi.string().required(), color: joi.string() }),
         priority: joi.number(),
         steps: joi.array(),
         image: joi.string().allow("", null),

@@ -7,8 +7,4 @@ app.use("/user", userRoutes);
 app.use("/auth" , authLimiter, authRoutes);
 app.use("/images", imageRoutes);
 
-app.all("*", (req, res, next) => {
-  res.status(404).json({ success: false, message: "cant find this page" });
-});
-
 module.exports = app;

@@ -1,8 +1,9 @@
-module.exports = paginate = (itemsPerPage, page, items) => {
-  const start = page == 1 ? 0 : page * itemsPerPage - itemsPerPage;
-  const end = start + itemsPerPage;
-  const paginatedItems = items.slice(start, end);
-  const previousPage = items[start - 1] ? true : false;
-  const nextPage = items[end] ? true : false;
-  return { paginatedItems, previousPage, nextPage };
+module.exports = paginationResponse = (itemsPerPage, page, items, total) => {
+  const pages = Math.ceil(total / itemsPerPage);
+  const start = (page - 1) * itemsPerPage;
+  const end = page * itemsPerPage;
+
+  const previousPage = page > 1;
+  const nextPage = page < pages;
+  return { previousPage, nextPage };
 };

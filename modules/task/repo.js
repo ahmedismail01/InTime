@@ -1,5 +1,6 @@
 const Model = require("./model");
 const mongoose = require("mongoose");
+
 const isExists = async (query) => {
   if (query) {
     const response = await Model.findOne(query);
@@ -24,14 +25,54 @@ const isExists = async (query) => {
   }
 };
 
-const list = async (query, sortBy, sortingType) => {
+const list = async (query = {}, sortBy = "createdAt", sortingType = 1) => {
   try {
-    if (!sortingType) {
-      sortingType = 1;
-    }
-    if (query)
-      return await Model.find(query).sort([[`${sortBy}`, Number(sortingType)]]).lean();
-    else return await Model.find({}).lean();
+    return await Model.find(query)
+      .sort([[`${sortBy}`, Number(sortingType)]])
+      .lean();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const listPaginated = async (
+  query = {},
+  sortBy = "createdAt",
+  sortingType = 1,
+  page = 1,
+  size = 10,
+) => {
+  try {
+    const tasks = await Model.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $sort: {
+          [sortBy]: Number(sortingType),
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: (page - 1) * size }, { $limit: size }],
+          tags: [
+            {
+              $group: {
+                _id: "$tag.name",
+                name: { $first: "$tag.name" },
+                color: { $first: "$tag.color" },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+    return {
+      total: tasks[0]?.metadata[0]?.total,
+      tasks: tasks[0]?.data,
+      tags: tasks[0]?.tags,
+    };
   } catch (err) {
     console.log(err);
   }
@@ -178,4 +219,5 @@ module.exports = {
   remove,
   update,
   search,
+  listPaginated,
 };
