@@ -3,7 +3,11 @@ const { checkAuth } = require("../../utils/checkAuth");
 const multer = require("multer");
 const app = require("express").Router();
 const path = require("path");
-const { createTask, updateTask } = require("../../helpers/validation/task");
+const {
+  createTask,
+  updateTask,
+  getTasks,
+} = require("../../helpers/validation/task");
 const validate = require("../../utils/common.validate");
 const storage = multer.diskStorage({
   destination: "./public/uploads",
@@ -17,17 +21,17 @@ app.post(
   "/addUserTask/",
   [checkAuth, upload.single("image")],
   validate(createTask),
-  controller.createTask
+  controller.createTask,
 );
 app.get("/searchTasks/:text", checkAuth, controller.search);
-app.get("/", checkAuth, controller.getUserTasks);
+app.get("/", [checkAuth, validate(getTasks)], controller.getUserTasks);
 app.get("/:id", checkAuth, controller.getTaskById);
 app.post("/deleteById/:id", checkAuth, controller.terminateTask);
 app.post(
   "/updateById/:id",
   [checkAuth, upload.single("image")],
   validate(updateTask),
-  controller.updateTask
+  controller.updateTask,
 );
 app.post("/completeTask/:taskId", checkAuth, controller.completeTask);
 app.delete("/removeTaskImage/:taskId", checkAuth, controller.removeTaskPhoto);

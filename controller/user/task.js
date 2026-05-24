@@ -31,7 +31,8 @@ const createTask = async (req, res) => {
 };
 const getUserTasks = async (req, res) => {
   req.query.userId = new mongoose.Types.ObjectId(req.user.id);
-  const { page = 1, size = 10, sortBy, sortingType, ...query } = req?.query;
+  let { page = 1, size = 10, sortBy, sortingType, ...query } = req?.query;
+
 
   const {
     error,
@@ -156,7 +157,7 @@ const completeTask = async (req, res) => {
 
 const search = async (req, res) => {
   const userId = req.user.id;
-  const { page = 1, size = 10 } = req?.query;
+  let { page = 1, size = 10 } = req?.query;
   const text = req.params.text;
   const tasks = await repo.search(userId, text);
 
