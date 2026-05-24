@@ -8,9 +8,10 @@ let scheduledTasks = {}; // Track scheduled tasks
 const scheduleTask = async (task) => {
   try {
     const { endAt, startAt, _id, name } = task;
+    const id = _id.toString();
 
     // Check if the task is already scheduled
-    if (scheduledTasks[_id]) {
+    if (scheduledTasks[id]) {
       return; // Skip if already scheduled
     }
 
@@ -49,10 +50,11 @@ const scheduleTask = async (task) => {
         });
         handleWebPushForTasks(task, payload);
         await Task.update({ _id: _id }, { backlog: true });
+        deleteScheduledTask(_id);
       });
 
       // Record scheduled jobs
-      scheduledTasks[_id] = { startJob, beforeEndJob, endJob };
+      scheduledTasks[id] = { startJob, beforeEndJob, endJob };
     } else {
       await Task.update({ _id: task._id }, { backlog: true });
     }
@@ -75,7 +77,7 @@ const deleteScheduledTask = (_id) => {
       if (jobs.endJob) {
         jobs.endJob.cancel();
       }
-      delete scheduledTasks[_id];
+      delete scheduledTasks[id];
     }
   } catch (err) {
     console.error("Error scheduling tasks:", err);

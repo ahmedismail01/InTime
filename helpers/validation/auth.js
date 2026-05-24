@@ -20,7 +20,6 @@ module.exports = {
           .string()
           .email({
             minDomainSegments: 2,
-            tlds: { allow: ["com", "net", "eg"] },
           })
           .empty()
           .required()
@@ -34,7 +33,7 @@ module.exports = {
           .empty()
           .required()
           .pattern(
-            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
           )
           .messages({
             "string.required": "please enter your password",
@@ -81,7 +80,7 @@ module.exports = {
           .empty()
           .required()
           .pattern(
-            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
+            new RegExp(/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
           )
           .messages({
             "string.required": "please enter your password",

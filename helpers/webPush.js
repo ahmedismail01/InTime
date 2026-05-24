@@ -1,11 +1,18 @@
 const webpush = require("web-push");
 const User = require("../modules/user/model");
+
+webpush.setVapidDetails(
+  "mailto:ahmed.ism1990.ai@gmail.com",
+  process.env.WEB_PUSH_PUBLIC_KEY,
+  process.env.WEB_PUSH_PRIVATE_KEY,
+);
+
 exports.handleWebPushForTasks = async (task, payload) => {
   try {
     const userId = task.userId;
     const user = await User.findOneAndUpdate(
       { _id: userId },
-      { $push: { notifications: { message: JSON.parse(payload).message } } }
+      { $push: { notifications: { message: JSON.parse(payload).message } } },
     );
     if (!user.webSubscription) {
       return console.log(`${user.email} doesnt have a webSub`);
@@ -20,7 +27,8 @@ exports.handleWebPushForUsers = async (userId, payload) => {
   try {
     const user = await User.findOneAndUpdate(
       { _id: userId },
-      { $push: { notifications: { message: JSON.parse(payload).message } } }
+      { $push: { notifications: { message: JSON.parse(payload).message } } },
+      { returnDocument: "after" },
     );
     if (!user.webSubscription) {
       return console.log(`${user.email} doesnt have a webSub`);
@@ -33,10 +41,5 @@ exports.handleWebPushForUsers = async (userId, payload) => {
 };
 
 exports.sendWebPushNotification = (sub, payload) => {
-  webpush.setVapidDetails(
-    "mailto:ahmed.ism1990.ai@gmail.com",
-    process.env.WEB_PUSH_PUBLIC_KEY,
-    process.env.WEB_PUSH_PRIVATE_KEY
-  );
   webpush.sendNotification(sub, payload).catch((err) => console.log(err));
 };

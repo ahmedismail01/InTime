@@ -66,29 +66,55 @@ module.exports = {
           }
         })
         .allow("", null),
-      priority: joi
-        .array()
-        .items(joi.number().greater(-1).less(4).allow("", null))
-        .allow("", null),
+      priority: joi.alternatives().try(
+        joi.number().greater(-1).less(4).allow("", null),
+        joi
+          .array()
+          .items(joi.number().greater(-1).less(4).allow("", null))
+          .custom((value) => {
+            if (value?.length) {
+              return { $in: value };
+            }
+
+            return value;
+          })
+          .allow("", null),
+      ),
       page: joi.number().integer().min(1).default(1),
       sortBy: joi.string().allow("", null),
       backlog: joi
-        .array()
-        .items(joi.boolean())
-        .custom((value) => {
-          if (value) {
-            return { $in: value };
-          }
-        })
+        .alternatives()
+        .try(
+          joi.boolean(),
+
+          joi
+            .array()
+            .items(joi.boolean())
+            .custom((value) => {
+              if (value?.length) {
+                return { $in: value };
+              }
+
+              return value;
+            }),
+        )
         .allow("", null),
       completed: joi
-        .array()
-        .items(joi.boolean())
-        .custom((value) => {
-          if (value) {
-            return { $in: value };
-          }
-        })
+        .alternatives()
+        .try(
+          joi.boolean(),
+
+          joi
+            .array()
+            .items(joi.boolean())
+            .custom((value) => {
+              if (value?.length) {
+                return { $in: value };
+              }
+
+              return value;
+            }),
+        )
         .allow("", null),
       createdAt: joi.date().allow("", null),
       updatedAt: joi.date().allow("", null),

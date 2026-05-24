@@ -33,7 +33,6 @@ const getUserTasks = async (req, res) => {
   req.query.userId = new mongoose.Types.ObjectId(req.user.id);
   let { page = 1, size = 10, sortBy, sortingType, ...query } = req?.query;
 
-  console.log(query);
   const {
     error,
     tasks = [],
