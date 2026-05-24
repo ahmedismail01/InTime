@@ -59,6 +59,7 @@ module.exports = {
       priority: joi.number().greater(-1).less(4),
       page: joi.number().integer().min(1).default(1),
       sortBy: joi.string().allow("", null),
+      backlog: joi.boolean().allow("", null),
       completed: joi
         .array()
         .items(joi.boolean())
