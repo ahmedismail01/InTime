@@ -55,16 +55,35 @@ module.exports = {
       startAt: joi.date().allow("", null),
       endAt: joi.date().allow("", null),
       disc: joi.string().allow("", null),
-      tag: joi
-        .object({
-          name: joi.string().allow("", null),
-          color: joi.string().allow("", null),
-        })
-        .custom((value) => {
-          if (value) {
-            return { $in: value };
-          }
-        })
+
+      "tag.name": joi
+        .alternatives()
+        .try(
+          joi.string().allow("", null),
+
+          joi
+            .array()
+            .items(joi.string())
+            .custom((value) => {
+              if (value?.length) return { $in: value };
+              return value;
+            }),
+        )
+        .allow("", null),
+
+      "tag.color": joi
+        .alternatives()
+        .try(
+          joi.string().allow("", null),
+
+          joi
+            .array()
+            .items(joi.string())
+            .custom((value) => {
+              if (value?.length) return { $in: value };
+              return value;
+            }),
+        )
         .allow("", null),
       priority: joi.alternatives().try(
         joi.number().greater(-1).less(4).allow("", null),
