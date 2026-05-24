@@ -59,6 +59,9 @@ module.exports = {
       priority: joi.number().greater(-1).less(4),
       page: joi.number().integer().min(1).default(1),
       sortBy: joi.string().allow("", null),
+      completed: joi.boolean().allow("", null),
+      createdAt: joi.date().allow("", null),
+      updatedAt: joi.date().allow("", null),
       sortingType: joi.string().allow("", null),
       size: joi
         .number()
