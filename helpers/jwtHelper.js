@@ -7,7 +7,7 @@ const signAccessToken = (id) => {
       },
     },
     process.env.ACCESS_TOKEN_PRIVATE_KEY,
-    { expiresIn: "300s" }
+    { expiresIn: "15m" },
   );
 };
 const signRefreshToken = (id, createdAt) => {
@@ -17,7 +17,7 @@ const signRefreshToken = (id, createdAt) => {
       createdAt,
     },
     process.env.REFRESH_TOKEN_PRIVATE_KEY,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 };
 

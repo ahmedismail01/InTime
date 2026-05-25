@@ -2,6 +2,7 @@ const Task = require("../../modules/task/repo");
 const schedule = require("node-schedule");
 const moment = require("moment");
 const { handleWebPushForTasks } = require("../webPush");
+const { notifyUser } = require("../notificationCenter");
 
 let scheduledTasks = {}; // Track scheduled tasks
 
@@ -23,32 +24,37 @@ const scheduleTask = async (task) => {
 
       // Schedule job for task start
       const startJob = schedule.scheduleJob(startAt, () => {
-        console.log(`It's time to start task "${name}"`);
-        const payload = JSON.stringify({
+        const payload = {
+          type: "task",
+          id: _id,
           title: "Task started.",
           message: `It's time to start task "${name}"`,
-        });
-        handleWebPushForTasks(task, payload);
+        };
+        notifyUser(task.userId, payload);
       });
 
       // Schedule job for task nearing deadline
       const beforeEndJob = schedule.scheduleJob(beforeItEnds, () => {
         console.log(`The deadline for "${name}" is coming up soon`);
-        const payload = JSON.stringify({
+        const payload = {
+          type: "task",
+          id: _id,
           title: "Upcoming Task Deadline.",
           message: `The deadline for "${name}" is coming up soon`,
-        });
-        handleWebPushForTasks(task, payload);
+        };
+        notifyUser(task.userId, payload);
       });
 
       // Schedule job for task end
       const endJob = schedule.scheduleJob(endAt, async () => {
         console.log(`Task: "${name}" time is up, but you can still catch up`);
-        const payload = JSON.stringify({
+        const payload = {
+          type: "task",
+          id: _id,
           title: "The deadline for the task has arrived.",
           message: `Task: "${name}" time is up, but you can still catch up`,
-        });
-        handleWebPushForTasks(task, payload);
+        };
+        notifyUser(task.userId, payload);
         await Task.update({ _id: _id }, { backlog: true });
         deleteScheduledTask(_id);
       });

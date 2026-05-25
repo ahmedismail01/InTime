@@ -3,7 +3,7 @@ const otpRepo = require("../../modules/otp/repo");
 const taskRepo = require("../../modules/task/repo");
 const userRepo = require("../../modules/user/repo");
 const scheduleTasks = require("../../helpers/scheduler/tasks");
-const { handleWebPushForUsers } = require("../../helpers/webPush");
+const { notifyUser } = require("../../helpers/notificationCenter");
 
 const createProject = async (req, res) => {
   const adminId = req.user.id;
@@ -69,7 +69,8 @@ const editProject = async (req, res) => {
     photo: photo,
   };
   const isAdmin = project.record.members.find(
-    (member) => member.memberId.toString() === userId && member.role === "admin"
+    (member) =>
+      member.memberId.toString() === userId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -92,7 +93,8 @@ const generateInviteLink = async (req, res) => {
     return res.json(project);
   }
   const isAdmin = project.record.members.find(
-    (member) => member.memberId.toString() === userId && member.role === "admin"
+    (member) =>
+      member.memberId.toString() === userId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -120,7 +122,7 @@ const joinProject = async (req, res) => {
     return res.json(project);
   }
   const isMember = project.record.members.find(
-    (member) => member.memberId.toString() === userId
+    (member) => member.memberId.toString() === userId,
   );
   if (isMember) {
     return res.json({
@@ -129,18 +131,22 @@ const joinProject = async (req, res) => {
     });
   }
   project.record.members.push({ memberId: userId, role: "user" });
-  const payload = JSON.stringify({
+
+  const payload = {
+    userId: userId,
+    type: "project",
+    id: projectId,
     title: "member joined",
     message: `Someone joined your project ${project.record.name}, go check him out`,
-  });
+  };
 
   const admin = project.record.members.find(
-    (member) => member.role === "admin"
+    (member) => member.role === "admin",
   );
-  handleWebPushForUsers(admin.memberId, payload);
+  notifyUser(admin.memberId, payload);
   const updatedProject = await projectRepo.update(
     { _id: projectId },
-    { members: project.record.members }
+    { members: project.record.members },
   );
   res.json(updatedProject);
 };
@@ -155,7 +161,7 @@ const assignTask = async (req, res) => {
   }
   const isAdmin = project.record.members.find(
     (member) =>
-      member.memberId.toString() === adminId && member.role === "admin"
+      member.memberId.toString() === adminId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -164,7 +170,7 @@ const assignTask = async (req, res) => {
     });
   }
   const isMember = project.record.members.find(
-    (member) => member.memberId.toString() === userId
+    (member) => member.memberId.toString() === userId,
   );
   if (!isMember) {
     return res.json({
@@ -177,15 +183,18 @@ const assignTask = async (req, res) => {
   form.projectId = projectId;
   const task = await taskRepo.create(form);
   if (task.success) {
-    const payload = JSON.stringify({
+    const payload = {
+      userId: userId,
+      type: "task",
+      id: task.record._id,
       title: "task assigned",
       message: `You have been given a task from project ${project.record.name}, go check it out`,
-    });
+    };
     scheduleTasks.handleTaskCreation(task.record);
-    handleWebPushForUsers(userId, payload);
+    notifyUser(userId, payload);
     const user = await userRepo.update(
       { _id: userId },
-      { $inc: { "tasks.onGoingTasks": 1 } }
+      { $inc: { "tasks.onGoingTasks": 1 } },
     );
   }
 
@@ -199,7 +208,7 @@ const getProjectTasks = async (req, res) => {
     return res.json(project);
   }
   const isMember = project.record.members.find(
-    (member) => member.memberId.toString() === userId
+    (member) => member.memberId.toString() === userId,
   );
   if (!isMember) {
     return res.json({
@@ -219,7 +228,7 @@ const getMemebers = async (req, res) => {
   }
   const memberIds = project.record.members.map((member) => member.memberId);
   const isMember = project.record.members.find(
-    (member) => member.memberId.toString() === userId
+    (member) => member.memberId.toString() === userId,
   );
   if (!isMember) {
     return res.json({
@@ -240,7 +249,7 @@ const removeMember = async (req, res) => {
   }
   const isAdmin = project.record.members.find(
     (member) =>
-      member.memberId.toString() === adminId && member.role === "admin"
+      member.memberId.toString() === adminId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -268,7 +277,7 @@ const editProjectTask = async (req, res) => {
   }
   const isAdmin = project.record.members.find(
     (member) =>
-      member.memberId.toString() === adminId && member.role === "admin"
+      member.memberId.toString() === adminId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -280,7 +289,7 @@ const editProjectTask = async (req, res) => {
   if (wantedTask.success) {
     const updatedTask = await taskRepo.update(
       { _id: taskId, projectId: projectId, userId: wantedTask.record.userId },
-      form
+      form,
     );
     scheduleTasks.handleTaskDeletion(taskId);
     scheduleTasks.handleTaskCreation(updatedTask.record);
@@ -299,7 +308,7 @@ const removeProject = async (req, res) => {
   }
   const isAdmin = project.record.members.find(
     (member) =>
-      member.memberId.toString() === adminId && member.role === "admin"
+      member.memberId.toString() === adminId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -321,7 +330,7 @@ const removeProjectTask = async (req, res) => {
   }
   const isAdmin = project.record.members.find(
     (member) =>
-      member.memberId.toString() === adminId && member.role === "admin"
+      member.memberId.toString() === adminId && member.role === "admin",
   );
   if (!isAdmin) {
     return res.json({
@@ -338,12 +347,12 @@ const removeProjectTask = async (req, res) => {
     if (removedTask.record.completed == true) {
       const user = await userRepo.update(
         { _id: removedTask.record.userId },
-        { $inc: { "tasks.completedTasks": -1 } }
+        { $inc: { "tasks.completedTasks": -1 } },
       );
     } else {
       const user = await userRepo.update(
         { _id: removedTask.record.userId },
-        { $inc: { "tasks.onGoingTasks": -1 } }
+        { $inc: { "tasks.onGoingTasks": -1 } },
       );
     }
   }
@@ -360,7 +369,7 @@ const removeProjectPhoto = async (req, res) => {
     }
     const isAdmin = project.record.members.find(
       (member) =>
-        member.memberId.toString() === adminId && member.role === "admin"
+        member.memberId.toString() === adminId && member.role === "admin",
     );
     if (!isAdmin) {
       return res.json({
@@ -370,7 +379,7 @@ const removeProjectPhoto = async (req, res) => {
     }
     const updatedProject = await projectRepo.update(
       { _id: projectId },
-      { photo: "" }
+      { photo: "" },
     );
     res.json({ updatedProject });
   } catch (err) {
