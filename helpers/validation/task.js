@@ -17,10 +17,16 @@ module.exports = {
         disc: joi.string().allow("", null),
         tag: joi
           .object({
-            name: joi.string().required(),
-            color: joi.string(),
+            name: joi.string().allow("", null),
+            color: joi.string().allow("", null),
           })
-          .allow("", null)
+          .custom((value) => {
+            if (!value?.name) {
+              return undefined;
+            }
+
+            return value;
+          })
           .optional(),
         priority: joi.number(),
         steps: joi.array(),
