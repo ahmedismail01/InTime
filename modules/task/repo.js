@@ -57,6 +57,7 @@ const listPaginated = async (
           metadata: [{ $count: "total" }],
           data: [{ $skip: (page - 1) * size }, { $limit: size }],
           tags: [
+            { $match: { "tag.name": { $exists: true } } },
             {
               $group: {
                 _id: "$tag.name",
